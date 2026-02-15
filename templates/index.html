@@ -13,10 +13,10 @@
 
     <hr>
 
-    {% for listing in listings %}
-        <pre style="white-space: pre-wrap;">{{ listing }}</pre>
-        <hr>
-    {% endfor %}
+    {% if listing %}
+    <div>{{ listing }}</div>
+    {% endif %}
+
 
 </body>
 </html>

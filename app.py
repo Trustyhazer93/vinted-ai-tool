@@ -49,38 +49,44 @@ Condition:
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    listings = []
+    listing = None
 
     if request.method == "POST":
         images = request.files.getlist("images")
+
+        content = [
+            {"type": "text", "text": "Generate ONE Vinted listing for this clothing item using ALL provided images."}
+        ]
 
         for image in images:
             image_bytes = image.read()
             encoded_image = base64.b64encode(image_bytes).decode("utf-8")
 
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": "Generate a Vinted listing for this clothing item."},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{encoded_image}"
-                                }
-                            }
-                        ]
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{encoded_image}"
                     }
-                ],
-                max_tokens=600
+                }
             )
 
-            listings.append(response.choices[0].message.content)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {
+                    "role": "user",
+                    "content": content
+                }
+            ],
+            max_tokens=700
+        )
 
-    return render_template("index.html", listings=listings)
+        listing = response.choices[0].message.content
+
+    return render_template("index.html", listing=listing)
+
 
 if __name__ == "__main__":
     app.run()
