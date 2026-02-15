@@ -14,9 +14,27 @@
     <hr>
 
     {% if listing %}
-    <div>{{ listing }}</div>
-    {% endif %}
+    <div id="output-box" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 15px; margin-top: 20px;">
+        {{ listing }}
+    </div>
 
+    <button onclick="copyText()" style="margin-top: 10px; padding: 8px 14px; cursor: pointer;">
+        Copy Listing
+    </button>
+
+    <p id="copy-status" style="color: green; display: none;">Copied!</p>
+    {% endif %}
+    <script>
+    function copyText() {
+        const text = document.getElementById("output-box").innerText;
+        navigator.clipboard.writeText(text).then(function() {
+            const status = document.getElementById("copy-status");
+            status.style.display = "block";
+            setTimeout(() => {
+                status.style.display = "none";
+            }, 2000);
+    });
+}   </script>
 
 </body>
 </html>
