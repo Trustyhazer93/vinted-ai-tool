@@ -51,7 +51,14 @@ Size:
 Condition: 
 Flaws: (only include if flaws are visible)
 
-[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.]
+[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.
+- fit type (e.g. oversized, slim fit, relaxed, straight leg, cropped, boxy, tailored etc.)
+- colour
+- material (if visually identifiable)
+- style aesthetic
+- wearability
+- referencing any listed flaws if present.]
+
 
 #[5 highly relevant hashtags in lowercase]
 """
