@@ -67,46 +67,53 @@ def index():
         images = request.files.getlist("images")
 
         content = [
-            {"type": "text", "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."}
+            {
+                "type": "text",
+                "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."
+            }
         ]
 
-    for image in images:
+        for image in images:
+            try:
+                img = Image.open(image)
+
+                max_size = (1000, 1000)
+                img.thumbnail(max_size)
+
+                buffer = io.BytesIO()
+                img.convert("RGB").save(buffer, format="JPEG", quality=75)
+                buffer.seek(0)
+
+                encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
+
+                content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{encoded_image}"
+                    }
+                })
+
+            except Exception as e:
+                print(f"Image processing error: {e}")
+
         try:
-            img = Image.open(image)
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {
+                        "role": "user",
+                        "content": content
+                    }
+                ],
+                max_tokens=500
+            )
 
-            max_size = (1000, 1000)
-            img.thumbnail(max_size)
-
-            buffer = io.BytesIO()
-            img.convert("RGB").save(buffer, format="JPEG", quality=75)
-            buffer.seek(0)
-
-            encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
-
-            content.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{encoded_image}"
-                }
-            })
+            listing = response.choices[0].message.content
 
         except Exception as e:
-            print(f"Image processing error: {e}")
-
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": content
-                }
-            ],
-            max_tokens=500
-        )
-
-        listing = response.choices[0].message.content
+            print(f"OpenAI API error: {e}")
+            listing = "Error generating listing. Please try again."
 
     return render_template("index.html", listing=listing)
 
