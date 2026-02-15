@@ -3,6 +3,9 @@ import os
 from flask import Flask, render_template, request
 from openai import OpenAI
 from dotenv import load_dotenv
+from PIL import Image
+import io
+
 
 # Load environment variables
 load_dotenv()
@@ -59,17 +62,28 @@ def index():
         ]
 
         for image in images:
-            image_bytes = image.read()
-            encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+    try:
+        img = Image.open(image)
 
-            content.append(
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{encoded_image}"
-                    }
-                }
-            )
+        max_size = (1000, 1000)
+        img.thumbnail(max_size)
+
+        buffer = io.BytesIO()
+        img.convert("RGB").save(buffer, format="JPEG", quality=75)
+        buffer.seek(0)
+
+        encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
+
+        content.append({
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{encoded_image}"
+            }
+        })
+
+    except Exception as e:
+        print(f"Image processing error: {e}")
+
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
