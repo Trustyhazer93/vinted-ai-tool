@@ -70,28 +70,28 @@ def index():
             {"type": "text", "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."}
         ]
 
-        for image in images:
-    try:
-        img = Image.open(image)
+    for image in images:
+        try:
+            img = Image.open(image)
 
-        max_size = (1000, 1000)
-        img.thumbnail(max_size)
+            max_size = (1000, 1000)
+            img.thumbnail(max_size)
 
-        buffer = io.BytesIO()
-        img.convert("RGB").save(buffer, format="JPEG", quality=75)
-        buffer.seek(0)
+            buffer = io.BytesIO()
+            img.convert("RGB").save(buffer, format="JPEG", quality=75)
+            buffer.seek(0)
 
-        encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
+            encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
 
-        content.append({
-            "type": "image_url",
-            "image_url": {
-                "url": f"data:image/jpeg;base64,{encoded_image}"
-            }
-        })
+            content.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{encoded_image}"
+                }
+            })
 
-    except Exception as e:
-        print(f"Image processing error: {e}")
+        except Exception as e:
+            print(f"Image processing error: {e}")
 
 
         response = client.chat.completions.create(
