@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vinted AI Listing Generator</title>
+</head>
+<body>
+    <h1>Vinted AI Listing Generator</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="images" multiple required>
+        <button type="submit">Generate Listings</button>
+    </form>
+
+    <hr>
+
+    {% for listing in listings %}
+        <pre style="white-space: pre-wrap;">{{ listing }}</pre>
+        <hr>
+    {% endfor %}
+
+</body>
+</html>
