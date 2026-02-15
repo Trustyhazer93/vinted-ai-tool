@@ -6,13 +6,11 @@ from dotenv import load_dotenv
 from PIL import Image
 import io
 
-
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 print("App starting...")
-
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -56,7 +54,6 @@ Flaws: (only include if flaws are visible)
 [2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.]
 
 #[5 highly relevant hashtags in lowercase]
-
 """
 
 @app.route("/", methods=["GET", "POST"])
@@ -66,22 +63,27 @@ def index():
     if request.method == "POST":
         images = request.files.getlist("images")
 
+        if not images or images[0].filename == "":
+            return render_template("index.html", listing="Please upload at least one image.")
+
         content = [
             {
                 "type": "text",
-                "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."
+                "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, fading, cracking, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."
             }
         ]
 
+        # Process each image safely
         for image in images:
             try:
                 img = Image.open(image)
 
-                max_size = (1000, 1000)
+                # Resize for speed + lower cost
+                max_size = (800, 800)
                 img.thumbnail(max_size)
 
                 buffer = io.BytesIO()
-                img.convert("RGB").save(buffer, format="JPEG", quality=75)
+                img.convert("RGB").save(buffer, format="JPEG", quality=65)
                 buffer.seek(0)
 
                 encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
@@ -95,25 +97,29 @@ def index():
 
             except Exception as e:
                 print(f"Image processing error: {e}")
+                continue
 
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {
-                        "role": "user",
-                        "content": content
-                    }
-                ],
-                max_tokens=500
-            )
+        # Only call OpenAI if we successfully added images
+        if len(content) > 1:
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": content}
+                    ],
+                    max_tokens=500,
+                    temperature=0.4
+                )
 
-            listing = response.choices[0].message.content
+                listing = response.choices[0].message.content
 
-        except Exception as e:
-            print(f"OpenAI API error: {e}")
-            listing = "Error generating listing. Please try again."
+            except Exception as e:
+                print(f"OpenAI API error: {e}")
+                listing = "Error generating listing. Please try again."
+
+        else:
+            listing = "No valid images were processed."
 
     return render_template("index.html", listing=listing)
 
