@@ -27,7 +27,13 @@ STRICT RULES:
 - If size is unclear, leave blank.
 - Do NOT guess brand or size.
 - Condition must be one of: New, Excellent, Very Good, Good, Fair.
-- Base condition only on visible wear.
+- Base condition ONLY on visible wear in the images.
+- If visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration), they MUST be clearly described in the description.
+- If no visible flaws exist, do NOT invent any.
+- Prioritise flaw analysis if close-up images appear to show damage.
+- Do not exaggerate flaws.
+- Describe severity accurately (minor, light, moderate, noticeable).
+- Be transparent and factual about flaws.
 - No emojis.
 - No extra commentary.
 - Optimise for Vinted search visibility using relevant fashion keywords.
@@ -45,7 +51,7 @@ Brand:
 Size: 
 Condition: 
 
-[2–4 sentence SEO-optimised description including style keywords, fit, wearability, and aesthetic.]
+[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and any visible flaws if present.]
 
 #[5 highly relevant hashtags in lowercase]
 """
