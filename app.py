@@ -39,7 +39,7 @@ STRICT RULES:
 - Optimise for Vinted search visibility using relevant fashion keywords.
 
 TITLE RULES:
-- Include brand (if known), item type, colour, graphic/theme, fit style, era/style vibe.
+- Include brand (if known) fit style colour item type - size.
 - Maximise relevant keywords naturally without repetition.
 - Keep it clean and readable.
 
