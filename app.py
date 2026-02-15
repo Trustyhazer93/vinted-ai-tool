@@ -28,18 +28,19 @@ STRICT RULES:
 - Do NOT guess brand or size.
 - Condition must be one of: New, Excellent, Very Good, Good, Fair.
 - Base condition ONLY on visible wear in the images.
-- If visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration), they MUST be clearly described in the description.
-- If no visible flaws exist, do NOT invent any.
-- Prioritise flaw analysis if close-up images appear to show damage.
-- Do not exaggerate flaws.
-- Describe severity accurately (minor, light, moderate, noticeable).
-- Be transparent and factual about flaws.
+- Carefully inspect ALL images for flaws before writing anything.
+- If ANY visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, repairs), you MUST list them in a separate "Flaws:" section.
+- The Flaws section must appear directly after Condition.
+- Each flaw must be described clearly and factually in one short sentence.
+- If no visible flaws exist, DO NOT include a Flaws section.
+- Accuracy is more important than making the item sound appealing.
+- Do not exaggerate or invent damage.
 - No emojis.
 - No extra commentary.
 - Optimise for Vinted search visibility using relevant fashion keywords.
 
 TITLE RULES:
-- Include brand (if known) fit style colour item type - size.
+- Include brand (if known), fit style, colour, item type, size.
 - Maximise relevant keywords naturally without repetition.
 - Keep it clean and readable.
 
@@ -50,10 +51,12 @@ Title:
 Brand: 
 Size: 
 Condition: 
+Flaws: (only include if flaws are visible)
 
-[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and any visible flaws if present.]
+[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.]
 
 #[5 highly relevant hashtags in lowercase]
+
 """
 
 @app.route("/", methods=["GET", "POST"])
@@ -64,7 +67,7 @@ def index():
         images = request.files.getlist("images")
 
         content = [
-            {"type": "text", "text": "Generate ONE Vinted listing for this clothing item using ALL provided images."}
+            {"type": "text", "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."}
         ]
 
         for image in images:
