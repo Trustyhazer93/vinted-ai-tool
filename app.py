@@ -100,7 +100,7 @@ def index():
                     "content": content
                 }
             ],
-            max_tokens=700
+            max_tokens=500
         )
 
         listing = response.choices[0].message.content
