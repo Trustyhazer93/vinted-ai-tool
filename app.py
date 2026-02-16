@@ -203,6 +203,17 @@ def index():
 with app.app_context():
     db.create_all()
 
+    # --- TEMP MIGRATION ---
+    from sqlalchemy import text
+    try:
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN is_generating BOOLEAN DEFAULT FALSE;'))
+        db.session.commit()
+        print("Column added successfully.")
+    except Exception as e:
+        print("Column likely already exists:", e)
+        db.session.rollback()
+
+
 
 if __name__ == "__main__":
     app.run()
