@@ -26,6 +26,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     credits = db.Column(db.Integer, default=10)
+    is_generating = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -88,20 +89,35 @@ def index():
 
     if request.method == "POST":
 
-        # -------------------------
-        # BACKEND LOCK
-        # -------------------------
-        if session.get("is_generating"):
+        user = db.session.query(User).with_for_update().first()
+
+        # If no user exists yet, create one automatically
+        if not user:
+            user = User(email="test@example.com", credits=100)
+            db.session.add(user)
+            db.session.commit()
+
+            # Re-lock after creating
+            user = db.session.query(User).with_for_update().first()
+
+
+        # ---- HARD LOCK CHECK ----
+        if user.is_generating:
             return render_template("index.html", listing="Generation already in progress. Please wait.")
 
-        session["is_generating"] = True
+        if user.credits <= 0:
+            return render_template("index.html", listing="You have no credits remaining.")
 
         try:
+            # ---- LOCK USER + DEDUCT CREDIT ATOMICALLY ----
+            user.is_generating = True
+            user.credits -= 1
+            db.session.commit()
+
             images = request.files.getlist("images")
 
             if not images or images[0].filename == "":
-                listing = "Please upload at least one image."
-                return render_template("index.html", listing=listing)
+                return render_template("index.html", listing="Please upload at least one image.")
 
             content = [
                 {
@@ -110,11 +126,10 @@ def index():
                 }
             ]
 
-            # Process images
+            # ---- IMAGE PROCESSING ----
             for image in images:
                 try:
                     img = Image.open(image)
-
                     max_size = (800, 800)
                     img.thumbnail(max_size)
 
@@ -135,31 +150,54 @@ def index():
                     print(f"Image processing error: {e}")
                     continue
 
-            if len(content) > 1:
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": content}
-                    ],
-                    max_tokens=500,
-                    temperature=0.4
-                )
+            if len(content) <= 1:
+                return render_template("index.html", listing="No valid images were processed.")
 
-                listing = response.choices[0].message.content
+            # ---- OPENAI CALL ----
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": content}
+                ],
+                max_tokens=500,
+                temperature=0.4
+            )
 
-            else:
-                listing = "No valid images were processed."
+            listing = response.choices[0].message.content
+
+            # ---- LOG GENERATION ----
+            tokens_used = response.usage.total_tokens if response.usage else None
+
+            generation = Generation(
+                user_id=user.id,
+                tokens_used=tokens_used
+            )
+
+            db.session.add(generation)
+            db.session.commit()
 
         except Exception as e:
-            print(f"OpenAI API error: {e}")
+            print(f"Error during generation: {e}")
+
+            db.session.rollback()
+
+            # Refund credit if something failed
+            user = User.query.get(user.id)
+            user.credits += 1
+            db.session.commit()
+
             listing = "Error generating listing. Please try again."
 
         finally:
-            # ALWAYS UNLOCK
-            session["is_generating"] = False
+            # ---- ALWAYS UNLOCK USER ----
+            user = User.query.get(user.id)
+            user.is_generating = False
+            db.session.commit()
 
     return render_template("index.html", listing=listing)
+
+
 
 
 with app.app_context():
