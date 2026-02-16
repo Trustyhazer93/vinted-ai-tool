@@ -5,11 +5,22 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from PIL import Image
 import io
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin
+from datetime import datetime
+
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+
 print("App starting...")
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -60,7 +71,7 @@ Flaws: (only include if flaws are visible)
 - referencing any listed flaws if present.]
 
 
-#[5 highly relevant hashtags in lowercase]
+# 5 highly relevant hashtags in lowercase 
 """
 
 @app.route("/", methods=["GET", "POST"])
