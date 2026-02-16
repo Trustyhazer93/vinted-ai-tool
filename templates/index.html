@@ -6,9 +6,9 @@
 <body>
     <h1>Vinted AI Listing Generator</h1>
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" onsubmit="lockButton()">
         <input type="file" name="images" multiple required>
-        <button type="submit">Generate Listings</button>
+        <button type="submit" id="generateBtn">Generate Listing</button>
     </form>
 
     <hr>
@@ -24,17 +24,27 @@
 
     <p id="copy-status" style="color: green; display: none;">Copied!</p>
     {% endif %}
-    <script>
-    function copyText() {
-        const text = document.getElementById("output-box").innerText;
-        navigator.clipboard.writeText(text).then(function() {
-            const status = document.getElementById("copy-status");
-            status.style.display = "block";
-            setTimeout(() => {
-                status.style.display = "none";
-            }, 2000);
+
+<script>
+function lockButton() {
+    const btn = document.getElementById("generateBtn");
+    btn.disabled = true;
+    btn.innerText = "Generating...";
+    btn.style.opacity = "0.6";
+    btn.style.cursor = "not-allowed";
+}
+
+function copyText() {
+    const text = document.getElementById("output-box").innerText;
+    navigator.clipboard.writeText(text).then(function() {
+        const status = document.getElementById("copy-status");
+        status.style.display = "block";
+        setTimeout(() => {
+            status.style.display = "none";
+        }, 2000);
     });
-}   </script>
+}
+</script>
 
 </body>
 </html>
