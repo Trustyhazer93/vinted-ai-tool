@@ -6,8 +6,9 @@ from dotenv import load_dotenv
 from PIL import Image
 import io
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin
 from datetime import datetime
+
+
 
 
 # Load environment variables
@@ -19,7 +20,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace("postg
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
-login_manager = LoginManager(app)
 
 print("App starting...")
 
