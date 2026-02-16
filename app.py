@@ -20,6 +20,18 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace("postg
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    credits = db.Column(db.Integer, default=10)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Generation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    tokens_used = db.Column(db.Integer)
 
 print("App starting...")
 
@@ -141,6 +153,8 @@ def index():
 
     return render_template("index.html", listing=listing)
 
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     app.run()
