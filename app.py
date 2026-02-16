@@ -201,7 +201,29 @@ def index():
 
 
 with app.app_context():
+    from sqlalchemy import text
+
+    # Ensure tables exist first
     db.create_all()
+
+    # Check if column exists before adding
+    result = db.session.execute(text("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name='user' AND column_name='is_generating';
+    """))
+
+    column_exists = result.fetchone()
+
+    if not column_exists:
+        db.session.execute(text("""
+            ALTER TABLE "user" 
+            ADD COLUMN is_generating BOOLEAN DEFAULT FALSE;
+        """))
+        db.session.commit()
+        print("is_generating column added.")
+    else:
+        print("is_generating column already exists.")
 
 
 if __name__ == "__main__":
