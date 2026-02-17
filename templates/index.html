@@ -5,7 +5,12 @@
 </head>
 <body>
     <h2>Welcome {{ current_user.email }}</h2>
-    <p>Credits Remaining: {{ current_user.credits }}</p>
+    {% if current_user.is_admin %}
+        <p><strong>Admin Account – Unlimited Credits</strong></p>
+    {% else %}
+        <p>Credits Remaining: {{ current_user.credits }}</p>
+    {% endif %}
+
     <a href="/logout">Logout</a>
 
     <hr>

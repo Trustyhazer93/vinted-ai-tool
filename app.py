@@ -36,7 +36,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     credits = db.Column(db.Integer, default=10)
     is_generating = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)  # ADD THIS
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 
 class Generation(db.Model):
@@ -121,12 +123,14 @@ def index():
         if user.is_generating:
             return render_template("index.html", listing="Generation already in progress. Please wait.")
 
-        if user.credits <= 0:
+        if not user.is_admin and user.credits <= 0:
             return render_template("index.html", listing="You have no credits remaining.")
+
 
         try:
             user.is_generating = True
-            user.credits -= 1
+            if not user.is_admin:
+                user.credits -= 1
             db.session.commit()
 
             images = request.files.getlist("images")
@@ -197,25 +201,12 @@ from sqlalchemy import text
 
 with app.app_context():
     try:
-        db.session.execute(text("ALTER TABLE \"user\" ADD COLUMN password_hash VARCHAR(256);"))
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;'))
         db.session.commit()
-        print("password_hash added")
+        print("is_admin column added")
     except Exception:
         db.session.rollback()
 
-    try:
-        db.session.execute(text("ALTER TABLE \"user\" ADD COLUMN is_generating BOOLEAN DEFAULT FALSE;"))
-        db.session.commit()
-        print("is_generating added")
-    except Exception:
-        db.session.rollback()
-
-    try:
-        db.session.execute(text("ALTER TABLE \"user\" ADD COLUMN created_at TIMESTAMP DEFAULT NOW();"))
-        db.session.commit()
-        print("created_at added")
-    except Exception:
-        db.session.rollback()
 
 
 if __name__ == "__main__":
