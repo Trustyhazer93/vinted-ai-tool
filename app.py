@@ -7,7 +7,14 @@ from PIL import Image
 import io
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
+from flask_login import (
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    current_user,
+    UserMixin,
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Load environment variables
@@ -15,7 +22,9 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace(
+    "postgres://", "postgresql://"
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -27,6 +36,52 @@ login_manager.login_view = "login"
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # -------------------------
+# ORIGINAL SYSTEM PROMPT (UNCHANGED)
+# -------------------------
+
+SYSTEM_PROMPT = """
+You are an expert Vinted clothing reseller and SEO specialist.
+
+Your job is to analyse clothing images and generate high-converting Vinted listings designed to maximise search visibility and buyer engagement.
+
+STRICT RULES:
+- Follow the exact format provided.
+- If brand is unclear, leave blank.
+- If size is unclear, leave blank.
+- Do NOT guess brand or size.
+- Condition must be one of: New, Excellent, Very Good, Good, Fair.
+- Base condition ONLY on visible wear in the images.
+- Carefully inspect ALL images for flaws before writing anything.
+- If ANY visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, repairs), you MUST list them in a separate "Flaws:" section.
+- The Flaws section must appear directly after Condition.
+- Each flaw must be described clearly and factually in one short sentence.
+- If no visible flaws exist, DO NOT include a Flaws section.
+- Accuracy is more important than making the item sound appealing.
+- Do not exaggerate or invent damage.
+- No emojis.
+- No extra commentary.
+- Optimise for Vinted search visibility using relevant fashion keywords.
+
+TITLE RULES:
+- Include brand (if known), fit style, colour, item type, size.
+- Maximise relevant keywords naturally without repetition.
+- Keep it clean and readable.
+
+FORMAT:
+
+Title: 
+
+Brand: 
+Size: 
+Condition: 
+Flaws: (only include if flaws are visible)
+
+[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.]
+
+#[5 highly relevant hashtags in lowercase]
+"""
+
+# -------------------------
 # DATABASE MODELS
 # -------------------------
 
@@ -36,9 +91,8 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     credits = db.Column(db.Integer, default=10)
     is_generating = db.Column(db.Boolean, default=False)
-    is_admin = db.Column(db.Boolean, default=False)  # ADD THIS
+    is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
 
 
 class Generation(db.Model):
@@ -68,8 +122,8 @@ def login():
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             return redirect(url_for("index"))
-        else:
-            return render_template("login.html", error="Invalid email or password.")
+
+        return render_template("login.html", error="Invalid email or password.")
 
     return render_template("login.html")
 
@@ -88,7 +142,7 @@ def register():
         new_user = User(
             email=email,
             password_hash=hashed_password,
-            credits=10
+            credits=10,
         )
 
         db.session.add(new_user)
@@ -126,22 +180,23 @@ def index():
         if not user.is_admin and user.credits <= 0:
             return render_template("index.html", listing="You have no credits remaining.")
 
-
         try:
             user.is_generating = True
+
             if not user.is_admin:
                 user.credits -= 1
+
             db.session.commit()
 
             images = request.files.getlist("images")
 
             if not images or images[0].filename == "":
-                return render_template("index.html", listing="Please upload at least one image.")
+                raise Exception("No images uploaded")
 
             content = [
                 {
                     "type": "text",
-                    "text": "Carefully inspect ALL provided images for visible flaws and generate ONE Vinted listing."
+                    "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, fading, cracking, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."
                 }
             ]
 
@@ -157,13 +212,15 @@ def index():
 
                 content.append({
                     "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{encoded_image}"
+                    }
                 })
 
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a Vinted listing expert."},
+                    {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": content}
                 ],
                 max_tokens=500,
@@ -171,7 +228,6 @@ def index():
             )
 
             listing = response.choices[0].message.content
-
             tokens_used = response.usage.total_tokens if response.usage else None
 
             generation = Generation(
@@ -184,9 +240,14 @@ def index():
 
         except Exception as e:
             db.session.rollback()
+
             user = User.query.get(current_user.id)
-            user.credits += 1
+
+            if not user.is_admin:
+                user.credits += 1
+
             db.session.commit()
+
             listing = "Error generating listing. Please try again."
 
         finally:
@@ -195,18 +256,6 @@ def index():
             db.session.commit()
 
     return render_template("index.html", listing=listing)
-
-
-from sqlalchemy import text
-
-with app.app_context():
-    try:
-        db.session.execute(text('ALTER TABLE "user" ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;'))
-        db.session.commit()
-        print("is_admin column added")
-    except Exception:
-        db.session.rollback()
-
 
 
 if __name__ == "__main__":
