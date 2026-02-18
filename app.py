@@ -1,5 +1,6 @@
 import base64
 import os
+import logging
 from flask import Flask, render_template, request, redirect, url_for
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -17,7 +18,10 @@ from flask_login import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Load environment variables
+# -------------------------
+# CONFIG
+# -------------------------
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -35,8 +39,12 @@ login_manager.login_view = "login"
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+logging.basicConfig(level=logging.INFO)
+
+MAX_IMAGES = 5
+
 # -------------------------
-# ORIGINAL SYSTEM PROMPT (UNCHANGED)
+# SYSTEM PROMPT
 # -------------------------
 
 SYSTEM_PROMPT = """
@@ -100,11 +108,64 @@ class Generation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     tokens_used = db.Column(db.Integer)
+    status = db.Column(db.String(20), default="completed")  # future-ready
+    result = db.Column(db.Text)  # future-ready
+    error = db.Column(db.Text)   # future-ready
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# -------------------------
+# GENERATION LOGIC (UPGRADE READY)
+# -------------------------
+
+def generate_listing(images):
+    """
+    This function contains ALL heavy logic.
+    When upgrading to background workers,
+    only this function will be queued instead of called directly.
+    """
+
+    content = [
+        {
+            "type": "text",
+            "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, fading, cracking, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."
+        }
+    ]
+
+    for image in images:
+        img = Image.open(image)
+        img.thumbnail((800, 800))
+
+        buffer = io.BytesIO()
+        img.convert("RGB").save(buffer, format="JPEG", quality=65)
+        buffer.seek(0)
+
+        encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
+
+        content.append({
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{encoded_image}"
+            }
+        })
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": content}
+        ],
+        max_tokens=500,
+        temperature=0.4
+    )
+
+    listing = response.choices[0].message.content
+    tokens_used = response.usage.total_tokens if response.usage else None
+
+    return listing, tokens_used
 
 
 # -------------------------
@@ -131,7 +192,7 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        email = request.form.get("email")
+        email = request.form.get("email").lower().strip()
         password = request.form.get("password")
 
         if User.query.filter_by(email=email).first():
@@ -160,9 +221,8 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
-
 # -------------------------
-# GENERATOR ROUTE
+# MAIN ROUTE
 # -------------------------
 
 @app.route("/", methods=["GET", "POST"])
@@ -175,77 +235,49 @@ def index():
         user = db.session.query(User).with_for_update().filter_by(id=current_user.id).first()
 
         if user.is_generating:
-            return render_template("index.html", listing="Generation already in progress. Please wait.")
+            return render_template("index.html", listing="Generation already in progress.")
 
         if not user.is_admin and user.credits <= 0:
             return render_template("index.html", listing="You have no credits remaining.")
 
+        images = request.files.getlist("images")
+
+        if not images or images[0].filename == "":
+            return render_template("index.html", listing="Please upload at least one image.")
+
+        if len(images) > MAX_IMAGES:
+            return render_template("index.html", listing=f"Maximum {MAX_IMAGES} images allowed.")
+
         try:
             user.is_generating = True
-
             if not user.is_admin:
                 user.credits -= 1
-
             db.session.commit()
 
-            images = request.files.getlist("images")
+            start_time = datetime.utcnow()
 
-            if not images or images[0].filename == "":
-                raise Exception("No images uploaded")
+            listing, tokens_used = generate_listing(images)
 
-            content = [
-                {
-                    "type": "text",
-                    "text": "Carefully inspect ALL provided images for visible flaws such as holes, stains, fading, cracking, or damage. Then generate ONE Vinted listing for this clothing item using ALL provided images."
-                }
-            ]
-
-            for image in images:
-                img = Image.open(image)
-                img.thumbnail((800, 800))
-
-                buffer = io.BytesIO()
-                img.convert("RGB").save(buffer, format="JPEG", quality=65)
-                buffer.seek(0)
-
-                encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
-
-                content.append({
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{encoded_image}"
-                    }
-                })
-
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": content}
-                ],
-                max_tokens=500,
-                temperature=0.4
-            )
-
-            listing = response.choices[0].message.content
-            tokens_used = response.usage.total_tokens if response.usage else None
+            end_time = datetime.utcnow()
+            logging.info(f"Generation took {(end_time - start_time).total_seconds()} seconds")
 
             generation = Generation(
                 user_id=user.id,
-                tokens_used=tokens_used
+                tokens_used=tokens_used,
+                status="completed",
+                result=listing
             )
 
             db.session.add(generation)
             db.session.commit()
 
         except Exception as e:
+            logging.error(f"Generation error: {e}")
             db.session.rollback()
 
             user = User.query.get(current_user.id)
-
             if not user.is_admin:
                 user.credits += 1
-
             db.session.commit()
 
             listing = "Error generating listing. Please try again."
@@ -256,7 +288,36 @@ def index():
             db.session.commit()
 
     return render_template("index.html", listing=listing)
+# -------------------------
+# AUTO MIGRATION (SAFE)
+# -------------------------
+
+def run_safe_migration():
+    with app.app_context():
+        inspector = db.inspect(db.engine)
+        columns = [col["name"] for col in inspector.get_columns("generation")]
+
+        with db.engine.connect() as connection:
+
+            if "status" not in columns:
+                connection.execute(
+                    db.text("ALTER TABLE generation ADD COLUMN status VARCHAR(20) DEFAULT 'completed'")
+                )
+
+            if "result" not in columns:
+                connection.execute(
+                    db.text("ALTER TABLE generation ADD COLUMN result TEXT")
+                )
+
+            if "error" not in columns:
+                connection.execute(
+                    db.text("ALTER TABLE generation ADD COLUMN error TEXT")
+                )
+
+        db.session.commit()
+
 
 
 if __name__ == "__main__":
+    run_safe_migration()
     app.run()
