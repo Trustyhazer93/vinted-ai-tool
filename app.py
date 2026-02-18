@@ -98,7 +98,7 @@ Flaws: (only include if flaws are visible)
 
 [2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.]
 
-#[5 highly relevant hashtags in lowercase]
+#5 highly relevant hashtags in lowercase
 """
 
 # -------------------------
