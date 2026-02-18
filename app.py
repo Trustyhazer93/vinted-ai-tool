@@ -45,10 +45,50 @@ logging.basicConfig(level=logging.INFO)
 MAX_IMAGES = 5
 
 # -------------------------
-# SYSTEM PROMPT (UNCHANGED)
+# SYSTEM PROMPT (YOUR ORIGINAL)
 # -------------------------
 
-SYSTEM_PROMPT = """[KEEPING YOUR EXACT PROMPT HERE]"""
+SYSTEM_PROMPT = """
+You are an expert Vinted clothing reseller and SEO specialist.
+
+Your job is to analyse clothing images and generate high-converting Vinted listings designed to maximise search visibility and buyer engagement.
+
+STRICT RULES:
+- Follow the exact format provided.
+- If brand is unclear, leave blank.
+- If size is unclear, leave blank.
+- Do NOT guess brand or size.
+- Condition must be one of: New, Excellent, Very Good, Good, Fair.
+- Base condition ONLY on visible wear in the images.
+- Carefully inspect ALL images for flaws before writing anything.
+- If ANY visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, repairs), you MUST list them in a separate "Flaws:" section.
+- The Flaws section must appear directly after Condition.
+- Each flaw must be described clearly and factually in one short sentence.
+- If no visible flaws exist, DO NOT include a Flaws section.
+- Accuracy is more important than making the item sound appealing.
+- Do not exaggerate or invent damage.
+- No emojis.
+- No extra commentary.
+- Optimise for Vinted search visibility using relevant fashion keywords.
+
+TITLE RULES:
+- Include brand (if known), fit style, colour, item type, size.
+- Maximise relevant keywords naturally without repetition.
+- Keep it clean and readable.
+
+FORMAT:
+
+Title: 
+
+Brand: 
+Size: 
+Condition: 
+Flaws: (only include if flaws are visible)
+
+[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.]
+
+#[5 highly relevant hashtags in lowercase]
+"""
 
 # -------------------------
 # DATABASE MODELS
@@ -79,32 +119,52 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # -------------------------
-# SAFE AUTO MIGRATION
+# OUTPUT VALIDATION
 # -------------------------
 
-def run_safe_migration():
-    with app.app_context():
-        inspector = db.inspect(db.engine)
-        columns = [col["name"] for col in inspector.get_columns("generation")]
+def validate_and_fix_listing(raw_output):
+    if not raw_output:
+        return "Error generating full listing.", True
 
-        with db.engine.connect() as connection:
+    fallback_used = False
 
-            if "status" not in columns:
-                connection.execute(
-                    db.text("ALTER TABLE generation ADD COLUMN status VARCHAR(20) DEFAULT 'completed'")
-                )
+    sections = {
+        "Title:": "",
+        "Brand:": "",
+        "Size:": "",
+        "Condition:": ""
+    }
 
-            if "result" not in columns:
-                connection.execute(
-                    db.text("ALTER TABLE generation ADD COLUMN result TEXT")
-                )
+    for key in sections.keys():
+        match = re.search(rf"{key}\s*(.*)", raw_output)
+        if match:
+            sections[key] = match.group(1).strip()
 
-            if "error" not in columns:
-                connection.execute(
-                    db.text("ALTER TABLE generation ADD COLUMN error TEXT")
-                )
+    # Fallback title if missing or blank
+    if not sections["Title:"]:
+        sections["Title:"] = "Clothing Item"
+        fallback_used = True
 
-        db.session.commit()
+    # You could optionally enforce required Condition:
+    if not sections["Condition:"]:
+        fallback_used = True
+
+    rebuilt = (
+        f"Title: {sections['Title:']}\n\n"
+        f"Brand: {sections['Brand:']}\n"
+        f"Size: {sections['Size:']}\n"
+        f"Condition: {sections['Condition:']}\n"
+    )
+
+    flaws_match = re.search(r"Flaws:\s*(.*)", raw_output)
+    if flaws_match:
+        rebuilt += f"Flaws: {flaws_match.group(1).strip()}\n"
+
+    description_split = re.split(r"Condition:.*?\n", raw_output, maxsplit=1)
+    if len(description_split) > 1:
+        rebuilt += "\n" + description_split[1].strip()
+
+    return rebuilt.strip(), fallback_used
 
 # -------------------------
 # GENERATION LOGIC
@@ -147,10 +207,10 @@ def generate_listing(images):
     )
 
     raw_listing = response.choices[0].message.content
-    listing = validate_and_fix_listing(raw_listing)
+    listing, fallback_used = validate_and_fix_listing(raw_listing)
     tokens_used = response.usage.total_tokens if response.usage else None
 
-    return listing, tokens_used
+    return listing, tokens_used, fallback_used
 
 # -------------------------
 # AUTH ROUTES
@@ -198,6 +258,7 @@ def register():
 
     return render_template("register.html")
 
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -239,17 +300,21 @@ def index():
 
             start_time = datetime.utcnow()
 
-            listing, tokens_used = generate_listing(images)
+            listing, tokens_used, fallback_used = generate_listing(images)
 
             end_time = datetime.utcnow()
             logging.info(f"Generation took {(end_time - start_time).total_seconds()} seconds")
 
+            if fallback_used and not user.is_admin:
+                user.credits += 1
+
             generation = Generation(
                 user_id=user.id,
                 tokens_used=tokens_used,
-                status="completed",
+                status="degraded" if fallback_used else "completed",
                 result=listing
             )
+
 
             db.session.add(generation)
             db.session.commit()
@@ -275,3 +340,4 @@ def index():
 
 if __name__ == "__main__":
     app.run()
+
