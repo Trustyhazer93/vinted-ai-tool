@@ -18,8 +18,10 @@ from flask_login import (
     UserMixin,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
+import requests
+from dotenv import load_dotenv
+
 # -------------------------
 # CONFIG
 # -------------------------
@@ -32,14 +34,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace(
     "postgres://", "postgresql://"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
-
-mail = Mail(app)
 
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
@@ -238,6 +232,31 @@ def verify_reset_token(token, expiration=3600):
         return None
     return email
 
+def send_reset_email(to_email, reset_url):
+    api_key = os.getenv("RESEND_API_KEY")
+
+    if not api_key:
+        print("RESEND_API_KEY not found!")
+        return
+
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": "onboarding@resend.dev",
+            "to": to_email,
+            "subject": "Reset Your Password",
+            "text": f"Click the link below to reset your password:\n\n{reset_url}\n\n If you did not request this please ignore for security.",
+        },
+    )
+
+    print("Resend response:", response.status_code, response.text)
+
+
+
 
 # -------------------------
 # AUTH ROUTES
@@ -302,20 +321,15 @@ def forgot_password():
             token = generate_reset_token(user.email)
             reset_url = url_for("reset_password", token=token, _external=True)
 
-            msg = Message("Password Reset Request", recipients=[user.email])
-            msg.body = f"""
-To reset your password, click the link below:
+            send_reset_email(user.email, reset_url)
 
-{reset_url}
-
-If you did not request this, ignore this email.
-"""
-
-            mail.send(msg)
-
-        return render_template("forgot_password.html", message="If that email exists, a reset link has been sent.")
+        return render_template(
+            "forgot_password.html",
+            message="If that email exists, a reset link has been sent."
+        )
 
     return render_template("forgot_password.html")
+
 
 @app.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
