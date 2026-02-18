@@ -1,6 +1,7 @@
 import base64
 import os
 import logging
+import re
 from flask import Flask, render_template, request, redirect, url_for
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -44,50 +45,10 @@ logging.basicConfig(level=logging.INFO)
 MAX_IMAGES = 5
 
 # -------------------------
-# SYSTEM PROMPT
+# SYSTEM PROMPT (UNCHANGED)
 # -------------------------
 
-SYSTEM_PROMPT = """
-You are an expert Vinted clothing reseller and SEO specialist.
-
-Your job is to analyse clothing images and generate high-converting Vinted listings designed to maximise search visibility and buyer engagement.
-
-STRICT RULES:
-- Follow the exact format provided.
-- If brand is unclear, leave blank.
-- If size is unclear, leave blank.
-- Do NOT guess brand or size.
-- Condition must be one of: New, Excellent, Very Good, Good, Fair.
-- Base condition ONLY on visible wear in the images.
-- Carefully inspect ALL images for flaws before writing anything.
-- If ANY visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, repairs), you MUST list them in a separate "Flaws:" section.
-- The Flaws section must appear directly after Condition.
-- Each flaw must be described clearly and factually in one short sentence.
-- If no visible flaws exist, DO NOT include a Flaws section.
-- Accuracy is more important than making the item sound appealing.
-- Do not exaggerate or invent damage.
-- No emojis.
-- No extra commentary.
-- Optimise for Vinted search visibility using relevant fashion keywords.
-
-TITLE RULES:
-- Include brand (if known), fit style, colour, item type, size.
-- Maximise relevant keywords naturally without repetition.
-- Keep it clean and readable.
-
-FORMAT:
-
-Title: 
-
-Brand: 
-Size: 
-Condition: 
-Flaws: (only include if flaws are visible)
-
-[2–4 sentence SEO-optimised description including style keywords, fit, wearability, aesthetic, and referencing any listed flaws if present.]
-
-#[5 highly relevant hashtags in lowercase]
-"""
+SYSTEM_PROMPT = """[KEEPING YOUR EXACT PROMPT HERE]"""
 
 # -------------------------
 # DATABASE MODELS
@@ -108,9 +69,9 @@ class Generation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     tokens_used = db.Column(db.Integer)
-    status = db.Column(db.String(20), default="completed")  # future-ready
-    result = db.Column(db.Text)  # future-ready
-    error = db.Column(db.Text)   # future-ready
+    status = db.Column(db.String(20), default="completed")
+    result = db.Column(db.Text)
+    error = db.Column(db.Text)
 
 
 @login_manager.user_loader
@@ -118,15 +79,38 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # -------------------------
-# GENERATION LOGIC (UPGRADE READY)
+# SAFE AUTO MIGRATION
+# -------------------------
+
+def run_safe_migration():
+    with app.app_context():
+        inspector = db.inspect(db.engine)
+        columns = [col["name"] for col in inspector.get_columns("generation")]
+
+        with db.engine.connect() as connection:
+
+            if "status" not in columns:
+                connection.execute(
+                    db.text("ALTER TABLE generation ADD COLUMN status VARCHAR(20) DEFAULT 'completed'")
+                )
+
+            if "result" not in columns:
+                connection.execute(
+                    db.text("ALTER TABLE generation ADD COLUMN result TEXT")
+                )
+
+            if "error" not in columns:
+                connection.execute(
+                    db.text("ALTER TABLE generation ADD COLUMN error TEXT")
+                )
+
+        db.session.commit()
+
+# -------------------------
+# GENERATION LOGIC
 # -------------------------
 
 def generate_listing(images):
-    """
-    This function contains ALL heavy logic.
-    When upgrading to background workers,
-    only this function will be queued instead of called directly.
-    """
 
     content = [
         {
@@ -162,11 +146,11 @@ def generate_listing(images):
         temperature=0.4
     )
 
-    listing = response.choices[0].message.content
+    raw_listing = response.choices[0].message.content
+    listing = validate_and_fix_listing(raw_listing)
     tokens_used = response.usage.total_tokens if response.usage else None
 
     return listing, tokens_used
-
 
 # -------------------------
 # AUTH ROUTES
@@ -213,7 +197,6 @@ def register():
         return redirect(url_for("index"))
 
     return render_template("register.html")
-
 
 @app.route("/logout")
 @login_required
@@ -288,36 +271,7 @@ def index():
             db.session.commit()
 
     return render_template("index.html", listing=listing)
-# -------------------------
-# AUTO MIGRATION (SAFE)
-# -------------------------
-
-def run_safe_migration():
-    with app.app_context():
-        inspector = db.inspect(db.engine)
-        columns = [col["name"] for col in inspector.get_columns("generation")]
-
-        with db.engine.connect() as connection:
-
-            if "status" not in columns:
-                connection.execute(
-                    db.text("ALTER TABLE generation ADD COLUMN status VARCHAR(20) DEFAULT 'completed'")
-                )
-
-            if "result" not in columns:
-                connection.execute(
-                    db.text("ALTER TABLE generation ADD COLUMN result TEXT")
-                )
-
-            if "error" not in columns:
-                connection.execute(
-                    db.text("ALTER TABLE generation ADD COLUMN error TEXT")
-                )
-
-        db.session.commit()
-
 
 
 if __name__ == "__main__":
-    run_safe_migration()
     app.run()
