@@ -114,7 +114,7 @@ def load_user(user_id):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form.get("email")
+        email = request.form.get("email").lower().strip()
         password = request.form.get("password")
 
         user = User.query.filter_by(email=email).first()
