@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Promo Code Admin</title>
+</head>
+<body>
+
+<h2>Promo Code Management</h2>
+
+<a href="/">Back to main</a>
+
+<hr>
+
+<h3>Create New Code</h3>
+
+<form method="POST" action="/admin/promos/create">
+    Code: <input type="text" name="code" required>
+    Credits: <input type="number" name="credits" required>
+    Max Uses (optional): <input type="number" name="max_uses">
+    <button type="submit">Create</button>
+</form>
+
+<hr>
+
+<h3>Existing Codes</h3>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Code</th>
+        <th>Credits</th>
+        <th>Status</th>
+        <th>Uses</th>
+        <th>Max Uses</th>
+        <th>Action</th>
+    </tr>
+
+    {% for promo in promos %}
+    <tr>
+        <td>{{ promo.code }}</td>
+        <td>{{ promo.credits }}</td>
+        <td>{{ "Active" if promo.is_active else "Disabled" }}</td>
+        <td>{{ promo.uses_count }}</td>
+        <td>{{ promo.max_uses or "Unlimited" }}</td>
+        <td>
+            <a href="/admin/promos/toggle/{{ promo.id }}">
+                {{ "Disable" if promo.is_active else "Enable" }}
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

@@ -118,6 +118,22 @@ class Generation(db.Model):
     result = db.Column(db.Text)
     error = db.Column(db.Text)
 
+class PromoCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False)
+    credits = db.Column(db.Integer, nullable=False)
+
+    is_active = db.Column(db.Boolean, default=True)
+    max_uses = db.Column(db.Integer, nullable=True)  # None = unlimited
+    uses_count = db.Column(db.Integer, default=0)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PromoRedemption(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    promo_id = db.Column(db.Integer, db.ForeignKey("promo_code.id"), nullable=False)
+    redeemed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -351,6 +367,92 @@ def reset_password(token):
         return redirect(url_for("login"))
 
     return render_template("reset_password.html")
+
+@app.route("/redeem", methods=["POST"])
+@login_required
+def redeem_code():
+    code_input = request.form.get("promo_code").strip().upper()
+
+    promo = PromoCode.query.filter_by(code=code_input).first()
+
+    if not promo or not promo.is_active:
+        return render_template("index.html", listing="Invalid or inactive code.")
+
+    # Check usage limit
+    if promo.max_uses and promo.uses_count >= promo.max_uses:
+        return render_template("index.html", listing="This code has reached its usage limit.")
+
+    # Check if THIS user already redeemed
+    existing = PromoRedemption.query.filter_by(
+        user_id=current_user.id,
+        promo_id=promo.id
+    ).first()
+
+    if existing:
+        return render_template("index.html", listing="You have already used this code.")
+
+    # Apply credits
+    user = User.query.get(current_user.id)
+    user.credits += promo.credits
+
+    promo.uses_count += 1
+
+    redemption = PromoRedemption(
+        user_id=user.id,
+        promo_id=promo.id
+    )
+
+    db.session.add(redemption)
+    db.session.commit()
+
+    return render_template(
+        "index.html",
+        listing=f"Promo applied! {promo.credits} credits added."
+    )
+
+@app.route("/admin/promos")
+@login_required
+def admin_promos():
+    if not current_user.is_admin:
+        return redirect(url_for("index"))
+
+    promos = PromoCode.query.order_by(PromoCode.created_at.desc()).all()
+    return render_template("admin_promos.html", promos=promos)
+
+@app.route("/admin/promos/create", methods=["POST"])
+@login_required
+def create_promo():
+    if not current_user.is_admin:
+        return redirect(url_for("index"))
+
+    code = request.form.get("code").strip().upper()
+    credits = int(request.form.get("credits"))
+    max_uses = request.form.get("max_uses")
+
+    promo = PromoCode(
+        code=code,
+        credits=credits,
+        max_uses=int(max_uses) if max_uses else None,
+        is_active=True
+    )
+
+    db.session.add(promo)
+    db.session.commit()
+
+    return redirect(url_for("admin_promos"))
+
+@app.route("/admin/promos/toggle/<int:promo_id>")
+@login_required
+def toggle_promo(promo_id):
+    if not current_user.is_admin:
+        return redirect(url_for("index"))
+
+    promo = PromoCode.query.get_or_404(promo_id)
+    promo.is_active = not promo.is_active
+    db.session.commit()
+
+    return redirect(url_for("admin_promos"))
+
 
 # -------------------------
 # MAIN ROUTE
