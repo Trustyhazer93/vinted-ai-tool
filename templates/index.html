@@ -56,6 +56,15 @@
 
     <a href="/logout">Logout</a>
 
+    {% if current_user.is_admin %}
+    <p>
+        <a href="/admin/promos">
+            <button>Admin: Manage Promo Codes</button>
+        </a>
+    </p>
+    {% endif %}
+
+
     <hr>
 
     <form method="POST" enctype="multipart/form-data" onsubmit="lockButton()">
