@@ -309,7 +309,7 @@ def register():
         new_user = User(
             email=email,
             password_hash=hashed_password,
-            credits=10,
+            credits=0,
         )
 
         db.session.add(new_user)

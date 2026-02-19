@@ -1,182 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>AI Vinted Listing Generator</title>
-
+    <title>Vinted AI Listing Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            margin: 0;
-            padding: 40px;
-        }
-
-        .container {
             max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            margin: 40px auto;
+            padding: 20px;
         }
 
-        h1 {
-            margin-top: 0;
-            text-align: center;
-        }
-
-        /* Upload + Generate Row */
-        .upload-generate-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .upload-box input[type="file"] {
-            padding: 6px;
-        }
-
-        .generate-btn {
-            background-color: #00c853;
-            color: white;
-            border: none;
-            padding: 11px 20px;
-            font-size: 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            white-space: nowrap;
-            font-weight: bold;
-        }
-
-        .generate-btn:hover {
-            background-color: #00b34a;
-        }
-
-        .generate-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        h2 {
+            margin-bottom: 5px;
         }
 
         .credits {
-            text-align: right;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 10px;
         }
 
-        textarea {
-            width: 100%;
-            height: 260px;
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 6px;
+        #output-box {
+            white-space: pre-wrap;
             border: 1px solid #ccc;
-            resize: vertical;
-            font-family: monospace;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
         }
 
-        .loading {
-            display: none;
-            color: #00c853;
-            font-weight: bold;
+        button {
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        #copyBtn {
             margin-top: 10px;
         }
 
+        #copyStatus {
+            margin-left: 10px;
+            color: green;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+    <h2>Welcome {{ current_user.email }}</h2>
 
-    <h1>AI Vinted Listing Generator</h1>
+    {% if current_user.is_admin %}
+        <p class="credits"><strong>Admin Account – Unlimited Credits</strong></p>
+    {% else %}
+        <p class="credits">Credits Remaining: {{ current_user.credits }}</p>
+    {% endif %}
 
-    <div class="credits">
-        Credits remaining: <span id="credits">--</span>
-    </div>
+    <a href="/logout">Logout</a>
 
-    <!-- Upload + Generate -->
-    <div class="upload-generate-row">
+    <hr>
 
-        <div class="upload-box">
-            <label for="images"><b>Upload Images:</b></label><br>
-            <input
-                type="file"
-                id="images"
-                name="images"
-                accept="image/*"
-                multiple
-            >
+    <form method="POST" enctype="multipart/form-data" onsubmit="lockButton()">
+        <input type="file" name="images" multiple required>
+        <button type="submit" id="generateBtn">Generate Listing</button>
+    </form>
+
+    <hr>
+    <hr>
+
+    <h3>Redeem Promo Code</h3>
+
+    <form method="POST" action="/redeem">
+        <input type="text" name="promo_code" placeholder="Enter code" required>
+        <button type="submit">Redeem</button>
+    </form>
+
+
+    {% if listing %}
+        <div id="output-box">
+            {{ listing }}
         </div>
 
-        <button
-            id="generateBtn"
-            class="generate-btn"
-            onclick="generateListing()"
-        >
-            Generate Listing
-        </button>
-
-    </div>
-
-    <div id="loading" class="loading">
-        Generating listing... please wait
-    </div>
-
-    <textarea
-        id="output"
-        placeholder="Your generated listing will appear here..."
-    ></textarea>
-
-</div>
+        <button id="copyBtn" onclick="copyListing()">Copy to Clipboard</button>
+        <span id="copyStatus"></span>
+    {% endif %}
 
 <script>
-async function generateListing() {
+function lockButton() {
+    const btn = document.getElementById("generateBtn");
+    btn.disabled = true;
+    btn.innerText = "Generating...";
+}
 
-    const fileInput = document.getElementById("images");
-    const button = document.getElementById("generateBtn");
-    const loading = document.getElementById("loading");
-    const output = document.getElementById("output");
+function copyListing() {
+    const text = document.getElementById("output-box").innerText;
+    const status = document.getElementById("copyStatus");
 
-    if (fileInput.files.length === 0) {
-        alert("Please upload at least one image.");
-        return;
-    }
-
-    const formData = new FormData();
-    for (const file of fileInput.files) {
-        formData.append("images", file);
-    }
-
-    button.disabled = true;
-    loading.style.display = "block";
-    output.value = "";
-
-    try {
-
-        const response = await fetch("/generate", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            output.value = data.listing;
-            if (data.credits !== undefined) {
-                document.getElementById("credits").textContent = data.credits;
-            }
-        } else {
-            alert(data.error || "Generation failed");
-        }
-
-    } catch (err) {
-        alert("Server error. Please try again.");
-    }
-
-    button.disabled = false;
-    loading.style.display = "none";
+    navigator.clipboard.writeText(text).then(() => {
+        status.innerText = "Copied ✓";
+        setTimeout(() => {
+            status.innerText = "";
+        }, 2000);
+    }).catch(err => {
+        status.innerText = "Copy failed";
+    });
 }
 </script>
 
