@@ -14,6 +14,7 @@
 <h3>Create New Code</h3>
 
 <form method="POST" action="/admin/promos/create">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     Code: <input type="text" name="code" required>
     Credits: <input type="number" name="credits" required>
     Max Uses (optional): <input type="number" name="max_uses">

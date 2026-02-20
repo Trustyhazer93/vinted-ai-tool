@@ -21,6 +21,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
 import requests
 from dotenv import load_dotenv
+from flask_wtf.csrf import CSRFProtect
 
 # -------------------------
 # CONFIG
@@ -29,6 +30,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+csrf = CSRFProtect(app)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace(
     "postgres://", "postgresql://"

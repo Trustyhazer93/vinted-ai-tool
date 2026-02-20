@@ -68,6 +68,7 @@
     <hr>
 
     <form method="POST" enctype="multipart/form-data" onsubmit="lockButton()">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="file" name="images" multiple required>
         <button type="submit" id="generateBtn">Generate Listing</button>
     </form>
@@ -78,6 +79,7 @@
     <h3>Redeem Promo Code</h3>
 
     <form method="POST" action="/redeem">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="promo_code" placeholder="Enter code" required>
         <button type="submit">Redeem</button>
     </form>
