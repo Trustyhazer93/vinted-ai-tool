@@ -65,6 +65,7 @@ STRICT RULES:
 - Do NOT guess brand or size.
 - Condition must be one of: New, Excellent, Very Good, Good, Fair.
 - Base condition ONLY on visible wear in the images.
+- Include in the sentences the style or fit of an item if applicable.
 - Carefully inspect ALL images for flaws before writing anything.
 - If ANY visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, repairs), you MUST list them in a separate "Flaws:" section.
 - The Flaws section must appear directly after Condition.
