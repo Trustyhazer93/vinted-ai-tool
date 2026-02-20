@@ -22,6 +22,9 @@ from itsdangerous import URLSafeTimedSerializer
 import requests
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 
 # -------------------------
 # CONFIG
@@ -31,6 +34,11 @@ load_dotenv()
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
+limiter = Limiter(
+    key_func=lambda: current_user.id if current_user.is_authenticated else get_remote_address(),
+    app=app,
+    default_limits=[]
+)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace(
     "postgres://", "postgresql://"
@@ -463,6 +471,7 @@ def toggle_promo(promo_id):
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
+@limiter.limit("5 per minute; 50 per hour; 200 per day")
 def index():
     listing = None
 
