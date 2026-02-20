@@ -282,7 +282,18 @@ def send_reset_email(to_email, reset_url):
 
     print("Resend response:", response.status_code, response.text)
 
+def verify_turnstile(token):
+    secret = os.environ.get("TURNSTILE_SECRET_KEY")
 
+    url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+    response = requests.post(url, data={
+        "secret": secret,
+        "response": token
+    })
+
+    result = response.json()
+    return result.get("success", False)
 
 
 # -------------------------
@@ -309,6 +320,12 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        turnstile_token = request.form.get("cf-turnstile-response")
+        
+        if not verify_turnstile(turnstile_token):
+            return render_template("register.html", error="CAPTCHA verification failed. Please try again.")
+
+        # Existing code continues normally
         email = request.form.get("email").lower().strip()
         password = request.form.get("password")
 
