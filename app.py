@@ -326,7 +326,7 @@ def login():
 def register():
     if request.method == "POST":
         turnstile_token = request.form.get("cf-turnstile-response")
-        
+
         if not verify_turnstile(turnstile_token):
             return render_template("register.html", error="CAPTCHA verification failed. Please try again.")
 
