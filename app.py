@@ -84,11 +84,23 @@ CONDITION ASSESSMENT
 
 FLAWS HANDLING
 - Carefully inspect ALL images for flaws before writing anything.
-- If ANY visible flaws exist (stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, repairs), you MUST include a Flaws section.
-- The Flaws section must appear directly after Condition.
-- Each flaw must be factual, concise, and neutral.
+- Visible flaws include: stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, pilling, repairs, missing parts, or damage.
+
+IF flaws ARE visible:
+- You MUST include a Flaws section directly after Condition.
+- List each flaw as a short bullet point starting with "- ".
+- Keep wording factual, concise, and neutral.
 - Do NOT exaggerate or minimise damage.
-- If no visible flaws exist, DO NOT include a Flaws section.
+
+IF NO flaws are visible:
+- DO NOT include a Flaws section at all.
+- DO NOT write "None", "No flaws", "N/A", or similar.
+- DO NOT mention flaws anywhere in the output.
+
+STRICT OUTPUT RULES:
+- The Flaws section must appear AT MOST ONCE.
+- Never repeat the Flaws section.
+- Never leave the Flaws section blank.
 
 WRITING STYLE
 - Professional, natural, human-like reseller tone.
