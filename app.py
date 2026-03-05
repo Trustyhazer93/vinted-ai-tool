@@ -91,7 +91,7 @@ IF flaws ARE visible:
 - The Flaws section must appear exactly once.
 - List each flaw as a bullet point starting with "- ".
 - Each bullet must be one short factual sentence.
-- Do NOT repeat the Flaws section anywhere else.
+- Do NOT repeat or duplicate the Flaws section anywhere else.
 
 IF NO flaws are visible:
 - Do NOT include a Flaws section.
@@ -118,11 +118,11 @@ TITLE OPTIMISATION
 - Avoid repetition or keyword stuffing.
 
 DESCRIPTION OPTIMISATION
+- Do NOT repeat or restate flaws in the description.
 - Write 2–4 sentences.
 - Focus on style, fit, wearability, and typical use cases.
 - Use relevant fashion keywords naturally.
 - Highlight desirable features visible in the images.
-- Do NOT repeat or restate flaws in the description.
 
 HASHTAGS
 - Exactly 5 hashtags.
