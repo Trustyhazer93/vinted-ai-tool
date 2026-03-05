@@ -87,15 +87,16 @@ FLAWS HANDLING
 - Visible flaws include: stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, pilling, repairs, missing parts, or damage.
 
 IF flaws ARE visible:
-- You MUST include a Flaws section directly after Condition.
-- List each flaw as a short bullet point starting with "- ".
-- Keep wording factual, concise, and neutral.
-- Do NOT exaggerate or minimise damage.
+- Include ONE Flaws section directly after Condition.
+- The Flaws section must appear exactly once.
+- List each flaw as a bullet point starting with "- ".
+- Each bullet must be one short factual sentence.
+- Do NOT repeat the Flaws section anywhere else.
 
 IF NO flaws are visible:
-- DO NOT include a Flaws section at all.
-- DO NOT write "None", "No flaws", "N/A", or similar.
-- DO NOT mention flaws anywhere in the output.
+- Do NOT include a Flaws section.
+- Do NOT write "None", "No flaws", "N/A", or similar.
+- Do NOT mention flaws anywhere in the output.
 
 STRICT OUTPUT RULES:
 - The Flaws section must appear AT MOST ONCE.
@@ -121,7 +122,7 @@ DESCRIPTION OPTIMISATION
 - Focus on style, fit, wearability, and typical use cases.
 - Use relevant fashion keywords naturally.
 - Highlight desirable features visible in the images.
-- If flaws exist, briefly acknowledge them in a reassuring, factual way.
+- Do NOT repeat or restate flaws in the description.
 
 HASHTAGS
 - Exactly 5 hashtags.
