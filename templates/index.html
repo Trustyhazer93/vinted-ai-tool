@@ -151,19 +151,21 @@ hr{
 
 .sidebar{
     position:fixed;
-    right:-300px;
     top:0;
+    right:0;
     width:280px;
     height:100%;
     background:#15151c;
     border-left:1px solid #26263a;
-    transition:0.3s;
-    z-index:1000;
     padding:20px;
+    z-index:1000;
+
+    transform:translateX(100%);
+    transition:transform 0.3s ease;
 }
 
 .sidebar.open{
-    right:0;
+    transform:translateX(0);
 }
 
 .sidebar-header{
