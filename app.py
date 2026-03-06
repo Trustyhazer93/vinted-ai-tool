@@ -335,6 +335,8 @@ def verify_turnstile(token):
     return result.get("success", False)
 
 
+
+
 # -------------------------
 # AUTH ROUTES
 # -------------------------
@@ -520,6 +522,13 @@ def toggle_promo(promo_id):
 
     return redirect(url_for("admin_promos"))
 
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
 
 # -------------------------
 # MAIN ROUTE
