@@ -1,119 +1,298 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Vinted AI Listing Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-        }
+<title>Vinted AI Listing Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        h2 {
-            margin-bottom: 5px;
-        }
+<style>
 
-        .credits {
-            margin-bottom: 10px;
-        }
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#0f0f12;
+    color:#e5e5e5;
+}
 
-        #output-box {
-            white-space: pre-wrap;
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-top: 20px;
-            background-color: #f9f9f9;
-            border-radius: 6px;
-        }
+/* NAVBAR */
 
-        button {
-            padding: 8px 14px;
-            cursor: pointer;
-        }
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 16px;
+    background:#15151c;
+    border-bottom:1px solid #26263a;
+}
 
-        #copyBtn {
-            margin-top: 10px;
-        }
+.nav-left{
+    display:flex;
+    gap:16px;
+    align-items:center;
+}
 
-        #copyStatus {
-            margin-left: 10px;
-            color: green;
-            font-size: 0.9em;
-        }
-    </style>
+.nav-item{
+    cursor:pointer;
+    color:#d6d6ff;
+    font-weight:500;
+}
+
+.nav-item:hover{
+    color:#6dd5ff;
+}
+
+.dropdown{
+    position:relative;
+}
+
+.dropdown-content{
+    display:none;
+    position:absolute;
+    top:30px;
+    background:#1b1b25;
+    border:1px solid #303048;
+    border-radius:6px;
+    padding:10px;
+    min-width:200px;
+    z-index:100;
+}
+
+.dropdown:hover .dropdown-content{
+    display:block;
+}
+
+.dropdown-content input{
+    width:100%;
+    margin-bottom:8px;
+    padding:6px;
+}
+
+.dropdown-content button{
+    width:100%;
+}
+
+/* DISCLAIMER */
+
+.disclaimer{
+    background:#111118;
+    border-bottom:1px solid #26263a;
+    overflow:hidden;
+    white-space:nowrap;
+}
+
+.disclaimer span{
+    display:inline-block;
+    padding:6px 0;
+    animation:scroll 20s linear infinite;
+    color:#9aa6ff;
+}
+
+@keyframes scroll{
+    from{transform:translateX(100%)}
+    to{transform:translateX(-100%)}
+}
+
+/* MAIN CONTAINER */
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+/* UPLOAD + GENERATE */
+
+.upload-box{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.upload-box input{
+    flex:1;
+}
+
+button{
+    background:linear-gradient(90deg,#4fc3ff,#9b6bff);
+    border:none;
+    color:white;
+    padding:10px 16px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+/* OUTPUT */
+
+#output-box{
+    white-space:pre-wrap;
+    border:1px solid #26263a;
+    background:#15151c;
+    padding:16px;
+    border-radius:8px;
+    margin-top:20px;
+}
+
+/* COPY */
+
+.copy-section{
+    margin-top:10px;
+}
+
+#copyStatus{
+    margin-left:10px;
+    color:#8affc1;
+}
+
+.credits{
+    margin-bottom:10px;
+    color:#a0a0ff;
+}
+
+hr{
+    border:none;
+    border-top:1px solid #26263a;
+    margin:20px 0;
+}
+
+</style>
 </head>
+
 <body>
 
-    <h2>Welcome {{ current_user.email }}</h2>
+<!-- NAVBAR -->
 
-    {% if current_user.is_admin %}
-        <p class="credits"><strong>Admin Account – Unlimited Credits</strong></p>
-    {% else %}
-        <p class="credits">Credits Remaining: {{ current_user.credits }}</p>
-    {% endif %}
+<div class="navbar">
 
-    <a href="/logout">Logout</a>
+<div class="nav-left">
 
-    {% if current_user.is_admin %}
-    <p>
-        <a href="/admin/promos">
-            <button>Admin: Manage Promo Codes</button>
-        </a>
-    </p>
-    {% endif %}
+<div class="nav-item">Generator</div>
 
+<div class="nav-item">
+<a href="/buy-credits" style="color:inherit;text-decoration:none;">
+Buy Credits
+</a>
+</div>
 
-    <hr>
+<div class="dropdown nav-item">
+Promo Code
+<div class="dropdown-content">
 
-    <form method="POST" enctype="multipart/form-data" onsubmit="lockButton()">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="file" name="images" multiple required>
-        <button type="submit" id="generateBtn">Generate Listing</button>
-    </form>
+<form method="POST" action="/redeem">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <hr>
-    <hr>
+<input type="text" name="promo_code" placeholder="Enter code" required>
 
-    <h3>Redeem Promo Code</h3>
+<button type="submit">Redeem</button>
 
-    <form method="POST" action="/redeem">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="text" name="promo_code" placeholder="Enter code" required>
-        <button type="submit">Redeem</button>
-    </form>
+</form>
 
+</div>
+</div>
 
-    {% if listing %}
-        <div id="output-box">
-            {{ listing }}
-        </div>
+<div class="dropdown nav-item">
+Account
 
-        <button id="copyBtn" onclick="copyListing()">Copy to Clipboard</button>
-        <span id="copyStatus"></span>
-    {% endif %}
+<div class="dropdown-content">
+
+<p>{{ current_user.email }}</p>
+
+<a href="/logout">Logout</a>
+<br><br>
+
+<a href="#">T&Cs</a>
+<br>
+
+<a href="#">Delete Account</a>
+
+</div>
+</div>
+
+{% if current_user.is_admin %}
+<div class="nav-item">
+<a href="/admin/promos" style="color:inherit;text-decoration:none;">
+Admin
+</a>
+</div>
+{% endif %}
+
+</div>
+</div>
+
+<!-- DISCLAIMER -->
+
+<div class="disclaimer">
+<span>
+Disclaimer: These descriptions will not always be perfect or guarantee a sale!
+</span>
+</div>
+
+<!-- MAIN -->
+
+<div class="container">
+
+<h2>Welcome {{ current_user.email }}</h2>
+
+{% if current_user.is_admin %}
+<p class="credits"><strong>Admin Account – Unlimited Credits</strong></p>
+{% else %}
+<p class="credits">Credits Remaining: {{ current_user.credits }}</p>
+{% endif %}
+
+<hr>
+
+<form method="POST" enctype="multipart/form-data" onsubmit="lockButton()">
+
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+<div class="upload-box">
+<input type="file" name="images" multiple required>
+<button type="submit" id="generateBtn">Generate</button>
+</div>
+
+</form>
+
+{% if listing %}
+
+<div id="output-box">
+{{ listing }}
+</div>
+
+<div class="copy-section">
+<button id="copyBtn" onclick="copyListing()">Copy Listing</button>
+<span id="copyStatus"></span>
+</div>
+
+{% endif %}
+
+</div>
 
 <script>
-function lockButton() {
-    const btn = document.getElementById("generateBtn");
-    btn.disabled = true;
-    btn.innerText = "Generating...";
+
+function lockButton(){
+const btn=document.getElementById("generateBtn");
+btn.disabled=true;
+btn.innerText="Generating...";
 }
 
-function copyListing() {
-    const text = document.getElementById("output-box").innerText;
-    const status = document.getElementById("copyStatus");
+function copyListing(){
 
-    navigator.clipboard.writeText(text).then(() => {
-        status.innerText = "Copied ✓";
-        setTimeout(() => {
-            status.innerText = "";
-        }, 2000);
-    }).catch(err => {
-        status.innerText = "Copy failed";
-    });
+const text=document.getElementById("output-box").innerText;
+const status=document.getElementById("copyStatus");
+
+navigator.clipboard.writeText(text).then(()=>{
+status.innerText="Copied ✓";
+setTimeout(()=>{
+status.innerText="";
+},2000);
+}).catch(err=>{
+status.innerText="Copy failed";
+});
+
 }
+
 </script>
 
 </body>
