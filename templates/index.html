@@ -14,7 +14,7 @@ color:#e5e5e5;
 overflow-x:hidden;
 }
 
-/* TRIANGLE BACKGROUND */
+/* BACKGROUND TRIANGLE GRID */
 
 .triangle-bg{
 position:fixed;
@@ -23,49 +23,54 @@ left:0;
 width:100%;
 height:100%;
 z-index:-1;
+pointer-events:none;
 }
 
-.triangle-bg svg{
+/* grid layer */
+
+.triangle-grid{
+position:absolute;
 width:100%;
 height:100%;
+background-image:
+
+linear-gradient(60deg,#2a2a2f 1px,transparent 1px),
+linear-gradient(-60deg,#2a2a2f 1px,transparent 1px),
+linear-gradient(0deg,#2a2a2f 1px,transparent 1px);
+
+background-size:80px 70px;
+opacity:0.35;
 }
 
-/* triangle lines */
+/* vertex dots */
 
-.triangle-line{
-stroke:#2a2a2f;
-stroke-width:1;
-fill:none;
+.triangle-grid::after{
+content:"";
+position:absolute;
+width:100%;
+height:100%;
+background-image:radial-gradient(circle,#8a8a8a 1.5px,transparent 2px);
+background-size:80px 70px;
+opacity:0.4;
 }
 
-/* vertices */
+/* animated glow pulses */
 
-.vertex{
-fill:#bfbfbf;
+.glow-layer{
+position:absolute;
+width:200%;
+height:200%;
+background:
+radial-gradient(circle at 30% 40%, rgba(120,140,255,0.25), transparent 200px),
+radial-gradient(circle at 70% 70%, rgba(155,107,255,0.25), transparent 200px),
+radial-gradient(circle at 40% 80%, rgba(80,200,255,0.2), transparent 220px);
+animation:glowMove 25s linear infinite;
 }
 
-/* glow moving along edges */
-
-.glow{
-stroke:#7c8cff;
-stroke-width:2;
-stroke-linecap:round;
-stroke-dasharray:4 40;
-animation:flow 8s linear infinite;
-opacity:0.9;
-}
-
-.glow2{
-stroke:#9b6bff;
-stroke-width:2;
-stroke-linecap:round;
-stroke-dasharray:4 40;
-animation:flow 10s linear infinite;
-}
-
-@keyframes flow{
-from{stroke-dashoffset:0;}
-to{stroke-dashoffset:200;}
+@keyframes glowMove{
+0%{transform:translate(-10%,-10%)}
+50%{transform:translate(-20%,-30%)}
+100%{transform:translate(-10%,-10%)}
 }
 
 /* UI BOX STYLE */
@@ -179,7 +184,7 @@ cursor:pointer;
 button:hover{
 opacity:0.9;
 }
-
+    
 .generating{
 background:#444 !important;
 cursor:not-allowed;
@@ -275,56 +280,12 @@ display:block;
 
 <body>
 
-<!-- TRIANGLE GRID BACKGROUND -->
+<!-- TRIANGLE BACKGROUND -->
 
 <div class="triangle-bg">
-
-<svg viewBox="0 0 1200 800" preserveAspectRatio="none">
-
-<!-- grid -->
-
-<g>
-
-<!-- row 1 -->
-<path d="M0 80 L40 10 L80 80" class="triangle-line"/>
-<path d="M80 80 L120 10 L160 80" class="triangle-line"/>
-<path d="M160 80 L200 10 L240 80" class="triangle-line"/>
-<path d="M240 80 L280 10 L320 80" class="triangle-line"/>
-
-<!-- row 2 -->
-<path d="M40 10 L80 80 L120 10" class="triangle-line"/>
-<path d="M120 10 L160 80 L200 10" class="triangle-line"/>
-<path d="M200 10 L240 80 L280 10" class="triangle-line"/>
-
-</g>
-
-<!-- vertices -->
-
-<g>
-
-<circle cx="40" cy="10" r="1.8" class="vertex"/>
-<circle cx="80" cy="80" r="1.8" class="vertex"/>
-<circle cx="120" cy="10" r="1.8" class="vertex"/>
-<circle cx="160" cy="80" r="1.8" class="vertex"/>
-<circle cx="200" cy="10" r="1.8" class="vertex"/>
-<circle cx="240" cy="80" r="1.8" class="vertex"/>
-<circle cx="280" cy="10" r="1.8" class="vertex"/>
-
-</g>
-
-<!-- glow pulses along edges -->
-
-<path d="M0 80 L40 10 L80 80 L120 10 L160 80 L200 10"
-class="glow"/>
-
-<path d="M120 10 L160 80 L200 10 L240 80 L280 10"
-class="glow2"/>
-
-</svg>
-
+<div class="triangle-grid"></div>
+<div class="glow-layer"></div>
 </div>
-
-<!-- everything below remains the same -->
 
 <!-- NAVBAR -->
 
