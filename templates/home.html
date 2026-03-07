@@ -77,7 +77,7 @@ body{
 .page-wrap{
     max-width:1100px;
     margin:0 auto;
-    padding:0 12px 40px 12px;
+    padding:0 10px 28px 10px;
 }
 
 a{
@@ -90,27 +90,30 @@ a{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:14px 16px;
-    margin:12px 0 20px 0;
+    padding:12px 14px;
+    margin:12px 0 16px 0;
+    gap:12px;
 }
 
 .brand{
-    font-size:18px;
+    font-size:16px;
     font-weight:700;
     color:#ffffff;
     letter-spacing:0.2px;
+    line-height:1.2;
 }
 
 .nav-right{
     display:flex;
-    gap:10px;
+    gap:8px;
     align-items:center;
+    flex-shrink:0;
 }
 
 .nav-link{
     color:#d6d6ff;
     font-weight:500;
-    font-size:14px;
+    font-size:13px;
 }
 
 .nav-link:hover{
@@ -121,10 +124,10 @@ a{
     display:inline-block;
     background:linear-gradient(90deg,#4fc3ff,#9b6bff);
     color:white;
-    padding:10px 14px;
+    padding:9px 12px;
     border-radius:8px;
     font-weight:600;
-    font-size:14px;
+    font-size:13px;
     white-space:nowrap;
 }
 
@@ -135,16 +138,16 @@ a{
 /* HERO */
 
 .hero{
-    padding:18px 0 10px 0;
+    padding:10px 0 8px 0;
 }
 
 .hero-card{
-    padding:26px 18px;
+    padding:20px 16px;
 }
 
 .eyebrow{
     display:inline-block;
-    font-size:12px;
+    font-size:11px;
     font-weight:700;
     letter-spacing:0.8px;
     text-transform:uppercase;
@@ -152,40 +155,43 @@ a{
     background:rgba(79,195,255,0.08);
     border:1px solid #2d3e5e;
     border-radius:999px;
-    padding:7px 10px;
-    margin-bottom:16px;
+    padding:6px 9px;
+    margin-bottom:14px;
 }
 
 .hero h1{
     margin:0;
-    font-size:34px;
-    line-height:1.08;
+    font-size:28px;
+    line-height:1.12;
     color:#ffffff;
 }
 
 .hero-subtext{
-    margin-top:14px;
-    font-size:16px;
-    line-height:1.6;
+    margin-top:12px;
+    font-size:15px;
+    line-height:1.55;
     color:#b8bdd3;
     max-width:700px;
 }
 
 .hero-actions{
     display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    margin-top:22px;
+    flex-direction:column;
+    gap:10px;
+    margin-top:18px;
 }
 
 .primary-btn,
 .secondary-btn{
-    display:inline-block;
-    padding:12px 18px;
+    display:block;
+    width:100%;
+    padding:12px 16px;
     border-radius:8px;
     font-weight:600;
     font-size:15px;
     white-space:nowrap;
+    text-align:center;
+    box-sizing:border-box;
 }
 
 .primary-btn{
@@ -209,21 +215,23 @@ a{
 }
 
 .hero-note{
-    margin-top:16px;
+    margin-top:14px;
     font-size:13px;
+    line-height:1.5;
     color:#8f97bb;
 }
 
 .preview-box{
-    margin-top:24px;
+    margin-top:20px;
     border:1px solid #26263a;
     background:#111118;
     border-radius:10px;
-    padding:16px;
+    padding:14px;
+    overflow-x:auto;
 }
 
 .preview-label{
-    font-size:12px;
+    font-size:11px;
     color:#8a8aff;
     margin-bottom:10px;
     text-transform:uppercase;
@@ -233,26 +241,29 @@ a{
 .preview-output{
     white-space:pre-wrap;
     color:#e9e9f7;
-    line-height:1.55;
-    font-size:14px;
+    line-height:1.5;
+    font-size:13px;
+    word-break:break-word;
 }
 
 /* SECTION */
 
 .section{
-    margin-top:18px;
+    margin-top:16px;
 }
 
 .section-title{
-    font-size:24px;
+    font-size:22px;
     color:#ffffff;
-    margin:0 0 14px 0;
+    margin:0 0 12px 0;
+    line-height:1.2;
 }
 
 .section-subtitle{
-    margin:0 0 18px 0;
+    margin:0 0 16px 0;
     color:#aeb3c8;
-    line-height:1.6;
+    line-height:1.55;
+    font-size:14px;
 }
 
 /* HOW IT WORKS */
@@ -260,16 +271,16 @@ a{
 .cards{
     display:grid;
     grid-template-columns:1fr;
-    gap:14px;
+    gap:12px;
 }
 
 .card{
-    padding:18px;
+    padding:16px;
 }
 
 .step-number{
-    width:32px;
-    height:32px;
+    width:30px;
+    height:30px;
     border-radius:50%;
     display:flex;
     align-items:center;
@@ -277,32 +288,33 @@ a{
     background:linear-gradient(90deg,#4fc3ff,#9b6bff);
     color:white;
     font-weight:700;
-    margin-bottom:12px;
+    margin-bottom:10px;
+    font-size:14px;
 }
 
 .card h3{
-    margin:0 0 10px 0;
-    font-size:18px;
+    margin:0 0 8px 0;
+    font-size:17px;
     color:#ffffff;
 }
 
 .card p{
     margin:0;
     color:#b7bdd2;
-    line-height:1.6;
+    line-height:1.55;
     font-size:14px;
 }
 
 /* FEATURE STRIP */
 
 .feature-strip{
-    padding:18px;
+    padding:16px;
 }
 
 .feature-list{
     display:grid;
     grid-template-columns:1fr;
-    gap:12px;
+    gap:10px;
 }
 
 .feature-item{
@@ -316,6 +328,7 @@ a{
     display:block;
     color:#ffffff;
     margin-bottom:6px;
+    font-size:15px;
 }
 
 .feature-item span{
@@ -327,32 +340,34 @@ a{
 /* CTA */
 
 .cta{
-    margin-top:18px;
+    margin-top:16px;
 }
 
 .cta-box{
-    padding:22px 18px;
+    padding:20px 16px;
     text-align:center;
 }
 
 .cta-box h2{
-    margin:0 0 12px 0;
-    font-size:26px;
+    margin:0 0 10px 0;
+    font-size:24px;
     color:#ffffff;
+    line-height:1.2;
 }
 
 .cta-box p{
-    margin:0 auto 18px auto;
+    margin:0 auto 16px auto;
     max-width:650px;
     color:#b7bdd2;
-    line-height:1.6;
+    line-height:1.55;
+    font-size:14px;
 }
 
 /* FOOTER */
 
 .footer{
-    margin-top:18px;
-    padding:18px;
+    margin-top:16px;
+    padding:16px;
 }
 
 .footer-top{
@@ -364,24 +379,25 @@ a{
 .footer-brand{
     color:#ffffff;
     font-weight:700;
+    font-size:15px;
 }
 
 .footer-text{
     color:#99a1bf;
-    font-size:14px;
-    line-height:1.6;
+    font-size:13px;
+    line-height:1.5;
 }
 
 .footer-links{
     display:flex;
     flex-wrap:wrap;
-    gap:14px;
-    margin-top:10px;
+    gap:12px;
+    margin-top:8px;
 }
 
 .footer-links a{
     color:#d6d6ff;
-    font-size:14px;
+    font-size:13px;
 }
 
 .footer-links a:hover{
@@ -392,8 +408,44 @@ a{
 
 @media (min-width: 768px){
 
+    .page-wrap{
+        padding:0 12px 40px 12px;
+    }
+
+    .navbar{
+        padding:14px 16px;
+        margin:12px 0 20px 0;
+    }
+
+    .brand{
+        font-size:18px;
+    }
+
+    .nav-right{
+        gap:10px;
+    }
+
+    .nav-link{
+        font-size:14px;
+    }
+
+    .nav-btn{
+        padding:10px 14px;
+        font-size:14px;
+    }
+
+    .hero{
+        padding:18px 0 10px 0;
+    }
+
     .hero-card{
         padding:40px;
+    }
+
+    .eyebrow{
+        font-size:12px;
+        padding:7px 10px;
+        margin-bottom:16px;
     }
 
     .hero h1{
@@ -402,21 +454,140 @@ a{
     }
 
     .hero-subtext{
+        margin-top:14px;
         font-size:18px;
+        line-height:1.6;
+    }
+
+    .hero-actions{
+        flex-direction:row;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-top:22px;
+    }
+
+    .primary-btn,
+    .secondary-btn{
+        display:inline-block;
+        width:auto;
+        padding:12px 18px;
+    }
+
+    .hero-note{
+        margin-top:16px;
+    }
+
+    .preview-box{
+        margin-top:24px;
+        padding:16px;
+    }
+
+    .preview-label{
+        font-size:12px;
+    }
+
+    .preview-output{
+        line-height:1.55;
+        font-size:14px;
+    }
+
+    .section{
+        margin-top:18px;
+    }
+
+    .section-title{
+        font-size:24px;
+        margin:0 0 14px 0;
+    }
+
+    .section-subtitle{
+        margin:0 0 18px 0;
+        line-height:1.6;
     }
 
     .cards{
         grid-template-columns:repeat(3,1fr);
+        gap:14px;
+    }
+
+    .card{
+        padding:18px;
+    }
+
+    .step-number{
+        width:32px;
+        height:32px;
+        margin-bottom:12px;
+        font-size:16px;
+    }
+
+    .card h3{
+        margin:0 0 10px 0;
+        font-size:18px;
+    }
+
+    .card p{
+        line-height:1.6;
+    }
+
+    .feature-strip{
+        padding:18px;
     }
 
     .feature-list{
         grid-template-columns:repeat(3,1fr);
+        gap:12px;
+    }
+
+    .feature-item strong{
+        font-size:16px;
+    }
+
+    .cta{
+        margin-top:18px;
+    }
+
+    .cta-box{
+        padding:22px 18px;
+    }
+
+    .cta-box h2{
+        margin:0 0 12px 0;
+        font-size:26px;
+    }
+
+    .cta-box p{
+        margin:0 auto 18px auto;
+        line-height:1.6;
+    }
+
+    .footer{
+        margin-top:18px;
+        padding:18px;
     }
 
     .footer-top{
         flex-direction:row;
         justify-content:space-between;
         align-items:center;
+    }
+
+    .footer-brand{
+        font-size:16px;
+    }
+
+    .footer-text{
+        font-size:14px;
+        line-height:1.6;
+    }
+
+    .footer-links{
+        gap:14px;
+        margin-top:10px;
+    }
+
+    .footer-links a{
+        font-size:14px;
     }
 }
 

@@ -2,7 +2,7 @@ import base64
 import os
 import logging
 import re
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for,make_response
 from openai import OpenAI
 from dotenv import load_dotenv
 from PIL import Image
@@ -345,7 +345,6 @@ def verify_turnstile(token):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        print("LOGIN ROUTE: user already authenticated")
         return redirect(url_for("index"))
 
     if request.method == "POST":
@@ -356,13 +355,19 @@ def login():
 
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
-            print(f"LOGIN SUCCESS: {user.email}, authenticated={current_user.is_authenticated}")
             return redirect(url_for("index"))
 
-        print(f"LOGIN FAILED: {email}")
-        return render_template("login.html", error="Invalid email or password.")
+        response = make_response(render_template("login.html", error="Invalid email or password."))
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
-    return render_template("login.html")
+    response = make_response(render_template("login.html"))
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -374,13 +379,21 @@ def register():
         turnstile_token = request.form.get("cf-turnstile-response")
 
         if not verify_turnstile(turnstile_token):
-            return render_template("register.html", error="CAPTCHA verification failed. Please try again.")
+            response = make_response(render_template("register.html", error="CAPTCHA verification failed. Please try again."))
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
 
         email = request.form.get("email").lower().strip()
         password = request.form.get("password")
 
         if User.query.filter_by(email=email).first():
-            return render_template("register.html", error="Email already registered.")
+            response = make_response(render_template("register.html", error="Email already registered."))
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
 
         hashed_password = generate_password_hash(password)
 
@@ -396,7 +409,11 @@ def register():
         login_user(new_user)
         return redirect(url_for("index"))
 
-    return render_template("register.html")
+    response = make_response(render_template("register.html"))
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.route("/logout")
