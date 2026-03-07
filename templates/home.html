@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Reseller Descriptions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0f0f12;
+    color:#e5e5e5;
+    overflow-x:hidden;
+}
+
+/* BACKGROUND TRIANGLE GRID */
+
+.triangle-bg{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    pointer-events:none;
+}
+
+.triangle-grid{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-image:
+        linear-gradient(60deg,#2a2a2f 1px,transparent 1px),
+        linear-gradient(-60deg,#2a2a2f 1px,transparent 1px),
+        linear-gradient(0deg,#2a2a2f 1px,transparent 1px);
+    background-size:80px 70px;
+    opacity:0.35;
+}
+
+.triangle-grid::after{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-image:radial-gradient(circle,#7a7a7a 1.4px,transparent 2px);
+    background-size:80px 70px;
+    opacity:0.25;
+}
+
+.glow-layer{
+    position:absolute;
+    width:200%;
+    height:200%;
+    background:
+        radial-gradient(circle at 30% 40%, rgba(120,140,255,0.18), transparent 200px),
+        radial-gradient(circle at 70% 70%, rgba(155,107,255,0.18), transparent 220px),
+        radial-gradient(circle at 40% 80%, rgba(80,200,255,0.14), transparent 220px);
+    animation:glowMove 25s linear infinite;
+}
+
+@keyframes glowMove{
+    0%{transform:translate(-10%,-10%)}
+    50%{transform:translate(-20%,-30%)}
+    100%{transform:translate(-10%,-10%)}
+}
+
+/* REUSABLE */
+
+.ui-box{
+    background:#15151c;
+    border:1px solid #26263a;
+    border-radius:10px;
+    box-shadow:0 0 25px rgba(80,120,255,0.08);
+}
+
+.page-wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 12px 40px 12px;
+}
+
+a{
+    text-decoration:none;
+}
+
+/* NAVBAR */
+
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 16px;
+    margin:12px 0 20px 0;
+}
+
+.brand{
+    font-size:18px;
+    font-weight:700;
+    color:#ffffff;
+    letter-spacing:0.2px;
+}
+
+.nav-right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.nav-link{
+    color:#d6d6ff;
+    font-weight:500;
+    font-size:14px;
+}
+
+.nav-link:hover{
+    color:#6dd5ff;
+}
+
+.nav-btn{
+    display:inline-block;
+    background:linear-gradient(90deg,#4fc3ff,#9b6bff);
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:14px;
+    white-space:nowrap;
+}
+
+.nav-btn:hover{
+    opacity:0.92;
+}
+
+/* HERO */
+
+.hero{
+    padding:18px 0 10px 0;
+}
+
+.hero-card{
+    padding:26px 18px;
+}
+
+.eyebrow{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.8px;
+    text-transform:uppercase;
+    color:#8fb4ff;
+    background:rgba(79,195,255,0.08);
+    border:1px solid #2d3e5e;
+    border-radius:999px;
+    padding:7px 10px;
+    margin-bottom:16px;
+}
+
+.hero h1{
+    margin:0;
+    font-size:34px;
+    line-height:1.08;
+    color:#ffffff;
+}
+
+.hero-subtext{
+    margin-top:14px;
+    font-size:16px;
+    line-height:1.6;
+    color:#b8bdd3;
+    max-width:700px;
+}
+
+.hero-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:22px;
+}
+
+.primary-btn,
+.secondary-btn{
+    display:inline-block;
+    padding:12px 18px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:15px;
+    white-space:nowrap;
+}
+
+.primary-btn{
+    background:linear-gradient(90deg,#4fc3ff,#9b6bff);
+    color:white;
+}
+
+.primary-btn:hover{
+    opacity:0.92;
+}
+
+.secondary-btn{
+    background:#1a1a23;
+    border:1px solid #303048;
+    color:#d6d6ff;
+}
+
+.secondary-btn:hover{
+    border-color:#6dd5ff;
+    color:#6dd5ff;
+}
+
+.hero-note{
+    margin-top:16px;
+    font-size:13px;
+    color:#8f97bb;
+}
+
+.preview-box{
+    margin-top:24px;
+    border:1px solid #26263a;
+    background:#111118;
+    border-radius:10px;
+    padding:16px;
+}
+
+.preview-label{
+    font-size:12px;
+    color:#8a8aff;
+    margin-bottom:10px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+}
+
+.preview-output{
+    white-space:pre-wrap;
+    color:#e9e9f7;
+    line-height:1.55;
+    font-size:14px;
+}
+
+/* SECTION */
+
+.section{
+    margin-top:18px;
+}
+
+.section-title{
+    font-size:24px;
+    color:#ffffff;
+    margin:0 0 14px 0;
+}
+
+.section-subtitle{
+    margin:0 0 18px 0;
+    color:#aeb3c8;
+    line-height:1.6;
+}
+
+/* HOW IT WORKS */
+
+.cards{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:14px;
+}
+
+.card{
+    padding:18px;
+}
+
+.step-number{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(90deg,#4fc3ff,#9b6bff);
+    color:white;
+    font-weight:700;
+    margin-bottom:12px;
+}
+
+.card h3{
+    margin:0 0 10px 0;
+    font-size:18px;
+    color:#ffffff;
+}
+
+.card p{
+    margin:0;
+    color:#b7bdd2;
+    line-height:1.6;
+    font-size:14px;
+}
+
+/* FEATURE STRIP */
+
+.feature-strip{
+    padding:18px;
+}
+
+.feature-list{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+}
+
+.feature-item{
+    padding:14px;
+    border:1px solid #26263a;
+    background:#111118;
+    border-radius:8px;
+}
+
+.feature-item strong{
+    display:block;
+    color:#ffffff;
+    margin-bottom:6px;
+}
+
+.feature-item span{
+    color:#b7bdd2;
+    line-height:1.5;
+    font-size:14px;
+}
+
+/* CTA */
+
+.cta{
+    margin-top:18px;
+}
+
+.cta-box{
+    padding:22px 18px;
+    text-align:center;
+}
+
+.cta-box h2{
+    margin:0 0 12px 0;
+    font-size:26px;
+    color:#ffffff;
+}
+
+.cta-box p{
+    margin:0 auto 18px auto;
+    max-width:650px;
+    color:#b7bdd2;
+    line-height:1.6;
+}
+
+/* FOOTER */
+
+.footer{
+    margin-top:18px;
+    padding:18px;
+}
+
+.footer-top{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.footer-brand{
+    color:#ffffff;
+    font-weight:700;
+}
+
+.footer-text{
+    color:#99a1bf;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.footer-links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-top:10px;
+}
+
+.footer-links a{
+    color:#d6d6ff;
+    font-size:14px;
+}
+
+.footer-links a:hover{
+    color:#6dd5ff;
+}
+
+/* DESKTOP */
+
+@media (min-width: 768px){
+
+    .hero-card{
+        padding:40px;
+    }
+
+    .hero h1{
+        font-size:52px;
+        max-width:850px;
+    }
+
+    .hero-subtext{
+        font-size:18px;
+    }
+
+    .cards{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .feature-list{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .footer-top{
+        flex-direction:row;
+        justify-content:space-between;
+        align-items:center;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="triangle-bg">
+    <div class="triangle-grid"></div>
+    <div class="glow-layer"></div>
+</div>
+
+<div class="page-wrap">
+
+    <div class="navbar ui-box">
+        <div class="brand">Reseller Descriptions</div>
+
+        <div class="nav-right">
+            <a href="/login" class="nav-link">Log In</a>
+            <a href="/register" class="nav-btn">Get Started</a>
+        </div>
+    </div>
+
+    <section class="hero">
+        <div class="hero-card ui-box">
+            <div class="eyebrow">AI-powered listing generator</div>
+
+            <h1>Generate reseller listings in seconds.</h1>
+
+            <p class="hero-subtext">
+                Create clear, structured listings designed to save time and help improve the performance of your resale listings.
+            </p>
+
+            <div class="hero-actions">
+                <a href="/register" class="primary-btn">Start Free</a>
+                <a href="/login" class="secondary-btn">Log In</a>
+            </div>
+
+            <div class="hero-note">
+                Built for anyone selling items online who wants to create clear, structured listings faster without the repetitive typing.
+            </div>
+
+            <div class="preview-box">
+                <div class="preview-label">Example output</div>
+                <div class="preview-output">Title: Polo Ralph Lauren Long Sleeve Striped Rugby Shirt, Navy/White, Medium
+
+Brand: Polo Ralph Lauren
+Size: M
+Condition: Very Good
+
+Flaws: - There is a small yellow stain on the white stripe.
+
+This classic Polo Ralph Lauren rugby shirt features bold navy and white stripes, perfect for casual outings or sporty occasions. The custom fit ensures a comfortable wear, while the embroidered logo and number 3 add a stylish touch. Ideal for layering or wearing on its own, this shirt combines timeless style with functionality.
+
+#poloralphlauren #rugbyshirt #stripedshirt #casualwear #mensfashion</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">How it works</h2>
+        <p class="section-subtitle">
+            A simple flow designed to get your items listed faster.
+        </p>
+
+        <div class="cards">
+            <div class="card ui-box">
+                <div class="step-number">1</div>
+                <h3>Upload photos</h3>
+                <p>Add up to 5 images of your item so the AI can understand what you are selling.</p>
+            </div>
+
+            <div class="card ui-box">
+                <div class="step-number">2</div>
+                <h3>Generate instantly</h3>
+                <p>The tool creates a ready-to-use title and description in seconds using your credits.</p>
+            </div>
+
+            <div class="card ui-box">
+                <div class="step-number">3</div>
+                <h3>Copy and list</h3>
+                <p>Review the output, copy it into your resale listing, then make any changes you want.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="feature-strip ui-box">
+            <h2 class="section-title">Why sellers use it</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <strong>Saves time</strong>
+                    <span>Create listings faster and cut out repetitive manual writing.</span>
+                </div>
+
+                <div class="feature-item">
+                    <strong>Simple workflow</strong>
+                    <span>Upload images, generate text, and copy the result with minimal effort.</span>
+                </div>
+
+                <div class="feature-item">
+                    <strong>Detects visible imperfections</strong>
+                    <span>Helps include visible flaws from item photos so buyers know exactly what to expect.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="cta">
+        <div class="cta-box ui-box">
+            <h2>Start creating listings faster.</h2>
+            <p>
+                Join Reseller Descriptions and generate cleaner, faster product listings without starting from scratch every time.
+            </p>
+
+            <div class="hero-actions" style="justify-content:center;">
+                <a href="/register" class="primary-btn">Create Account</a>
+                <a href="/login" class="secondary-btn">I Already Have an Account</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+
+    <div class="feature-strip ui-box">
+
+    <h2 class="section-title">Simple credit system</h2>
+
+    <p class="section-subtitle">
+    Generate listings whenever you need them with a simple credit system.
+    </p>
+
+    <div class="feature-list">
+
+    <div class="feature-item">
+    <strong>One credit per generation</strong>
+    <span>Each time you generate a listing, one credit is used.</span>
+    </div>
+
+    <div class="feature-item">
+    <strong>Buy more anytime</strong>
+    <span>If you need more generations, you can purchase additional credits whenever you like.</span>
+    </div>
+
+    <div class="feature-item">
+    <strong>Want free credits?</strong>
+    <span>Promo codes may be available to claim free credits.</span>
+    </div>
+
+    </div>
+
+    </div>
+
+    </section>
+
+    <footer class="footer ui-box">
+        <div class="footer-top">
+            <div>
+                <div class="footer-brand">Reseller Descriptions</div>
+                <div class="footer-text">AI-powered listing generation for online sellers.</div>
+            </div>
+
+            <div class="footer-links">
+                <a href="/login">Log In</a>
+                <a href="/register">Register</a>
+                <a href="/terms">Terms & Conditions</a>
+                <a href="/privacy">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+</body>
+</html>

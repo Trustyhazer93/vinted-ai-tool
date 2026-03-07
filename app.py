@@ -24,6 +24,7 @@ from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from sqlalchemy import func
 
 
 # -------------------------
@@ -529,6 +530,16 @@ def terms():
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
+
+@app.route("/")
+def home():
+
+    total_generations = db.session.query(func.count(Generation.id)).scalar()
+
+    return render_template(
+        "home.html",
+        total_generations=total_generations
+    )
 
 # -------------------------
 # MAIN ROUTE
