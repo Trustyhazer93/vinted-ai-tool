@@ -571,7 +571,7 @@ def home():
 
 @app.route("/generator", methods=["GET", "POST"])
 @login_required
-@limiter.limit("5 per minute; 50 per hour; 200 per day")
+@limiter.limit("10 per minute; 100 per hour; 400 per day")
 def index():
     listing = None
 
