@@ -25,7 +25,6 @@ from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from sqlalchemy import func
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 # -------------------------
@@ -35,7 +34,6 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 load_dotenv()
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 csrf = CSRFProtect(app)
 limiter = Limiter(
     key_func=lambda: current_user.id if current_user.is_authenticated else get_remote_address(),
@@ -561,7 +559,6 @@ def home():
 @login_required
 @limiter.limit("5 per minute; 50 per hour; 200 per day")
 def index():
-
     listing = None
 
     if request.method == "POST":
