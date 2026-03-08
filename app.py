@@ -198,43 +198,58 @@ def validate_and_fix_listing(raw_output):
 
     fallback_used = False
 
-    raw_output = re.sub(r"(Flaws:.*?)(\nFlaws:)", r"\1", raw_output, flags=re.S)
+    raw_output = raw_output.strip().replace("\r\n", "\n")
 
     sections = {
         "Title:": "",
         "Brand:": "",
         "Size:": "",
-        "Condition:": ""
+        "Condition:": "",
+        "Flaws:": ""
     }
 
     for key in sections.keys():
-        match = re.search(rf"{key}\s*(.*)", raw_output)
+        match = re.search(
+            rf"^{re.escape(key)}\s*(.*)$",
+            raw_output,
+            flags=re.MULTILINE
+        )
         if match:
             sections[key] = match.group(1).strip()
 
-    # Fallback title if missing or blank
+    # Fallback title if missing
     if not sections["Title:"]:
         sections["Title:"] = "Clothing Item"
         fallback_used = True
 
-    # You could optionally enforce required Condition:
+    # Mark fallback if condition missing
     if not sections["Condition:"]:
         fallback_used = True
+
+    # Default flaws if missing
+    if not sections["Flaws:"]:
+        sections["Flaws:"] = "None"
+        fallback_used = True
+
+    # Remove all header lines so only description + hashtags remain
+    body = re.sub(r"^Title:.*$\n?", "", raw_output, flags=re.MULTILINE)
+    body = re.sub(r"^Brand:.*$\n?", "", body, flags=re.MULTILINE)
+    body = re.sub(r"^Size:.*$\n?", "", body, flags=re.MULTILINE)
+    body = re.sub(r"^Condition:.*$\n?", "", body, flags=re.MULTILINE)
+    body = re.sub(r"^Flaws:.*$\n?", "", body, flags=re.MULTILINE)
+
+    body = body.strip()
 
     rebuilt = (
         f"Title: {sections['Title:']}\n\n"
         f"Brand: {sections['Brand:']}\n"
         f"Size: {sections['Size:']}\n"
         f"Condition: {sections['Condition:']}\n"
+        f"Flaws: {sections['Flaws:']}"
     )
 
-    flaws_match = re.search(r"Flaws:\s*(.*)", raw_output)
-    if flaws_match:
-        rebuilt += f"Flaws: {flaws_match.group(1).strip()}\n"
-
-    description_split = re.split(r"Condition:.*?\n", raw_output, maxsplit=1)
-    if len(description_split) > 1:
-        rebuilt += "\n" + description_split[1].strip()
+    if body:
+        rebuilt += f"\n\n{body}"
 
     return rebuilt.strip(), fallback_used
 
