@@ -87,21 +87,20 @@ FLAWS HANDLING
 - Carefully inspect ALL images for flaws before writing anything.
 - Visible flaws include: stains, fading, cracking, holes, pulls, loose stitching, marks, distressing, discolouration, fabric thinning, pilling, repairs, missing parts, or damage.
 
-IF flaws ARE visible:
-- Include ONE Flaws section directly AFTER the Condition line.
-- The Flaws section must appear exactly once in the entire output.
-- Each flaw must be listed as a bullet point starting with "- ".
+ALWAYS include a Flaws section directly after the Condition line.
+
+If flaws ARE visible:
+- List each flaw as a bullet point starting with "- ".
 - Each bullet must be one short factual sentence.
 
-IF NO flaws are visible:
-- Do NOT include a Flaws section.
-- Do NOT write "None", "No flaws", "N/A", or similar.
-- Do NOT mention flaws anywhere in the output.
+If NO flaws are visible:
+- Write exactly: Flaws: None
+- Do not add bullet points.
 
 STRICT OUTPUT RULES:
-- The header "Flaws:" may appear either 0 times or 1 time.
-- It must NEVER appear more than once.
-- If present, it must appear immediately after the Condition line.
+- The Flaws section must appear exactly once in the output.
+- It must appear directly after the Condition line.
+- Never create a second Flaws section.
 
 WRITING STYLE
 - Professional, natural, human-like reseller tone.
@@ -138,8 +137,7 @@ Title:
 Brand:
 Size:
 Condition:
-
-[If flaws exist, insert the Flaws section here]
+Flaws:
 
 [2–4 sentence description]
 
