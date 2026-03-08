@@ -146,16 +146,24 @@ white-space:nowrap;
 margin-top:10px;
 }
 
-.disclaimer span{
-display:inline-block;
+.disclaimer-track{
+display:inline-flex;
+align-items:center;
+gap:40px;
 padding:6px 0;
 animation:scroll 20s linear infinite;
+white-space:nowrap;
+}
+
+.disclaimer-track span{
+display:inline-block;
 color:#9aa6ff;
+flex-shrink:0;
 }
 
 @keyframes scroll{
-from{transform:translateX(100%)}
-to{transform:translateX(-100%)}
+from{transform:translateX(0);}
+to{transform:translateX(-33.333%);}
 }
 
 /* MAIN */
@@ -293,7 +301,8 @@ display:block;
 @media (min-width: 900px){
 
 .navbar{
-max-width:1400px;
+max-width:1280px;
+width:calc(100% - 48px);
 margin:12px auto 0 auto;
 padding:16px 24px;
 box-sizing:border-box;
@@ -309,8 +318,10 @@ font-size:16px;
 }
 
 .disclaimer{
-max-width:1400px;
+max-width:1280px;
+width:calc(100% - 48px);
 margin:10px auto 0 auto;
+box-sizing:border-box;
 border-left:1px solid #26263a;
 border-right:1px solid #26263a;
 border-radius:12px;
@@ -321,21 +332,21 @@ font-size:14px;
 }
 
 .container{
-max-width:1200px;
-width:calc(100% - 24px);
-margin:24px auto 0 auto;
-padding:32px;
+max-width:1080px;
+width:calc(100% - 220px);
+margin:54px auto 0 auto;
+padding:34px 30px;
 box-sizing:border-box;
 }
 
 h2{
-font-size:32px;
+font-size:34px;
 margin-top:0;
 margin-bottom:10px;
 }
 
 .credits{
-font-size:17px;
+font-size:18px;
 margin-bottom:14px;
 }
 
@@ -351,7 +362,7 @@ font-size:15px;
 button{
 font-size:15px;
 padding:12px 20px;
-min-width:130px;
+min-width:120px;
 }
 
 #output-box{
@@ -446,9 +457,11 @@ Admin
 <!-- DISCLAIMER -->
 
 <div class="disclaimer">
-<span>
-Disclaimer: These descriptions will not always be perfect or guarantee a sale!
-</span>
+    <div class="disclaimer-track">
+        <span>Disclaimer: These descriptions will not always be perfect or guarantee a sale!</span>
+        <span>Disclaimer: These descriptions will not always be perfect or guarantee a sale!</span>
+        <span>Disclaimer: These descriptions will not always be perfect or guarantee a sale!</span>
+    </div>
 </div>
 
 <!-- MAIN -->
